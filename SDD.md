@@ -19,6 +19,22 @@ A local utility to query the HL7 FHIR R4 specification. It eliminates runtime in
 
 ---
 
+# SDD: MCP Schema Minification (Phase 1.5)
+
+## Feature Description
+The raw FHIR `StructureDefinition` JSON files are too large (~193KB for Patient) and contain unnecessary XML mappings, constraints, and base definitions, overwhelming the LLM context window. The MCP server must intercept and minify the schema before returning it to the agent.
+
+## Acceptance Criteria (AC)
+- **AC1:** The `get_resource_definition` MCP tool returns a minified list of elements instead of the full `StructureDefinition`.
+- **AC2:** The minified output retains only essential fields: `path`, `min`, `max`, `type`, `short`, and `binding`.
+- **AC3:** The minifier filters out elements with paths ending in `.extension`, `.modifierExtension`, or `.id` (except the root resource `id`).
+- **AC4:** The output size is reduced significantly.
+
+## Test Description (TDD - Commit 1)
+- `test_mcp_get_definition`: Updated to verify that the returned JSON is a list of elements, not a full `StructureDefinition` object, and that it lacks fields like `mapping`.
+
+---
+
 # SDD: Clinical Analyst Integration (Phase 2)
 
 ## Feature Description

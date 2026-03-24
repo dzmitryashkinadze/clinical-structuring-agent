@@ -63,11 +63,24 @@ async def test_mcp_list_resources():
 
 @pytest.mark.asyncio
 async def test_mcp_get_definition():
-    """AC4: Verify MCP tool returns valid JSON definition."""
+    """AC4, Phase 1.5 AC1-AC3: Verify MCP tool returns minified JSON definition."""
     result = await get_definition_handler({"resource_name": "Patient"})
     definition = json.loads(result[0].text)
-    assert definition.get("resourceType") == "StructureDefinition"
-    assert definition.get("name") == "Patient"
+
+    # It should now be a list of elements, not a full StructureDefinition object
+    assert isinstance(definition, list)
+
+    # Verify the first element is the root Patient object
+    assert definition[0]["path"] == "Patient"
+
+    # Verify minification: fields like 'mapping' or 'constraint' should be gone
+    for element in definition:
+        assert "mapping" not in element
+        assert "constraint" not in element
+
+        # Verify extensions are filtered out
+        assert not element["path"].endswith(".extension")
+        assert not element["path"].endswith(".modifierExtension")
 
 
 @pytest.mark.asyncio
