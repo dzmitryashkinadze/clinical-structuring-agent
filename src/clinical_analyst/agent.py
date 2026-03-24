@@ -30,6 +30,7 @@ from pydantic_ai.providers.google import GoogleProvider
 
 
 from src.validator.fhir_validator import FHIRValidator
+from src.validator.agent import ValidatorAgent, ValidationDecision
 
 
 class ClinicalAnalystAgent:
@@ -40,10 +41,17 @@ class ClinicalAnalystAgent:
         mcp_client: Optional[FHIRDocClient] = None,
         nci_client: Optional[NCIClient] = None,
         validator: Optional[FHIRValidator] = None,
+        validator_agent: Optional[ValidatorAgent] = None,
     ):
         self.mcp_client = mcp_client or FHIRDocClient()
         self.nci_client = nci_client or NCIClient()
         self.validator = validator or FHIRValidator()
+        # Only initialize the ValidatorAgent if Anthropic is available
+        self.validator_agent = (
+            validator_agent
+            if validator_agent
+            else (ValidatorAgent() if settings.ANTHROPIC_API_KEY else None)
+        )
         self.model = GoogleModel(
             "gemini-3-flash-preview",
             provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
@@ -102,63 +110,94 @@ class ClinicalAnalystAgent:
                 return match.model_dump()
             return None
 
-    async def run(self, note: str) -> List[Any]:
-        """AC2, AC4: Run the agent on a clinical note and return validated FHIR objects."""
-        try:
-            result = await self.agent.run(note, message_history=[])
+    async def run(self, note: str, max_retries: int = 3) -> List[Any]:
+        """AC2, AC4: Run the agent on a clinical note, with up to 3 retries via Validator feedback."""
+        message_history = []
+        attempt = 0
 
-            # Print conversation history before trying to parse the output
-            logger.info("\n========== LLM MESSAGES AND MCP CALLS ==========")
-            messages = result.all_messages()
-            # If all_messages is an async method/mock in tests, handle it safely
-            if asyncio.iscoroutine(messages):
-                messages = await messages
-
-            for msg in messages:
-                logger.info("-" * 40)
-                if hasattr(msg, "parts"):
-                    for part in msg.parts:
-                        logger.info(f"[{type(part).__name__}]")
-                        if hasattr(part, "content"):
-                            logger.info(part.content)
-                        if hasattr(part, "tool_name"):
-                            logger.info(f"Tool Call: {part.tool_name}")
-                            if hasattr(part, "args"):
-                                logger.info(f"Args: {part.args}")
-                        if hasattr(part, "tool_name") and hasattr(
-                            part, "content"
-                        ):  # ToolReturn
-                            logger.info(
-                                f"Return from {part.tool_name}: {str(part.content)[:200]}..."
-                            )
-                else:
-                    logger.info(str(msg))
-            logger.info("===============================================\n")
-
+        while attempt <= max_retries:
+            logger.info(
+                f"--- Extraction Attempt {attempt + 1} of {max_retries + 1} ---"
+            )
             try:
-                extracted_data = json.loads(result.output.fhir_json_bundle)
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to decode LLM output as JSON: {e}")
-                return []
+                # Use message history to allow LLM to see previous mistakes
+                result = await self.agent.run(note, message_history=message_history)
+                message_history = (
+                    result.all_messages()
+                )  # Save for next iteration if needed
 
-            if not isinstance(extracted_data, list):
-                logger.error(
-                    f"LLM returned a {type(extracted_data)} instead of a list."
+                try:
+                    extracted_data = json.loads(result.output.fhir_json_bundle)
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to decode LLM output as JSON: {e}")
+                    extracted_data = []  # Will likely trigger a validator rejection
+
+                if not isinstance(extracted_data, list):
+                    logger.error(
+                        f"LLM returned a {type(extracted_data)} instead of a list."
+                    )
+                    extracted_data = []
+
+                # 1. Python Validation (Tagging)
+                logger.info("Python FHIRValidator evaluating schemas...")
+                reports = self.validator.evaluate_bundle(extracted_data)
+
+                # If no Validator Agent is configured, just use the Python validator's output directly (Fallback)
+                if not self.validator_agent:
+                    logger.warning(
+                        "No ANTHROPIC_API_KEY found. Skipping Multi-Agent evaluation. Returning what Python validator accepted."
+                    )
+                    return [
+                        r.resource
+                        for r in reports
+                        if r.status == "VALID" and r.resource is not None
+                    ]
+
+                # 2. Multi-Agent Evaluation (Claude)
+                decision = await self.validator_agent.evaluate_bundle(
+                    note=note,
+                    extractor_messages=message_history,
+                    validation_reports=reports,
                 )
-                return []
 
-            logger.info("Raw extracted resources from LLM:")
-            for item in extracted_data:
-                logger.info(json.dumps(item, indent=2))
+                if decision.accepted:
+                    logger.info(
+                        "VALIDATOR AGENT ACCEPTED THE BUNDLE. Extraction complete."
+                    )
+                    # Return only the resources that actually passed Python schema enforcement
+                    return [
+                        r.resource
+                        for r in reports
+                        if r.status == "VALID" and r.resource is not None
+                    ]
+                else:
+                    logger.warning(
+                        f"VALIDATOR AGENT REJECTED THE BUNDLE. Feedback:\n{decision.feedback}"
+                    )
+                    if attempt < max_retries:
+                        # Append feedback as a new user message for the Extractor to try again
+                        feedback_prompt = f"The Validator Agent rejected your extraction. Here is their feedback:\n{decision.feedback}\nPlease try again and output the completely fixed JSON array."
+                        # Pydantic AI requires a string input here. We just append our feedback to the original note in our loop logic,
+                        # but because we pass message_history, it knows what it just did. We update `note` to be the feedback.
+                        note = feedback_prompt
+                    attempt += 1
 
-            # Phase 4 AC4: Use the FHIRValidator to enforce schemas and drop invalid data
-            validated_resources = self.validator.validate_bundle(extracted_data)
+            except Exception as e:
+                import traceback
 
-            return validated_resources
+                logger.error(f"Agent execution failed on attempt {attempt + 1}: {e}")
+                logger.error(traceback.format_exc())
+                attempt += 1
 
-        except Exception as e:
-            import traceback
-
-            logger.error(f"Agent execution failed: {e}")
-            logger.error(traceback.format_exc())
-            return []
+        logger.error(
+            f"Extraction failed after {max_retries} retries. Returning whatever was valid on the last run."
+        )
+        return (
+            [
+                r.resource
+                for r in reports
+                if r.status == "VALID" and r.resource is not None
+            ]
+            if "reports" in locals()
+            else []
+        )

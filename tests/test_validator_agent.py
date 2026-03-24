@@ -10,7 +10,7 @@ from fhir.resources.patient import Patient
 async def test_validator_agent_decision(mocker):
     """AC2, AC3: Verify Claude agent evaluates the context and outputs a ValidationDecision."""
     mock_run = mocker.patch("pydantic_ai.Agent.run", new_callable=AsyncMock)
-    mock_run.return_value.data = ValidationDecision(
+    mock_run.return_value.output = ValidationDecision(
         accepted=False, feedback="The patient resource is missing a valid telecom list."
     )
 
