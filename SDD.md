@@ -112,3 +112,59 @@ An advanced multi-agent orchestration loop to maximize extraction accuracy. A pr
 - `test_fhir_validator_report`: Verifies the Python validator correctly tags VALID/INVALID status and captures error strings.
 - `test_validator_agent_decision`: Mocks the Claude agent to ensure it returns a structured `ValidationDecision`.
 - `test_agent_orchestration_loop`: Verifies the Extractor loop retries up to `MAX_RETRIES` when rejected, and exits early when accepted.
+
+---
+
+# SDD: Clinical Resource Expansion (Phase 6)
+
+## Feature Description
+Expand the FHIR extraction pipeline from 7 core resources to comprehensive coverage of all 55 Clinical and Base resources defined in FHIR R4. This enables the system to extract structured data from complex clinical notes covering the full spectrum of patient care: conditions, medications, procedures, care plans, diagnostic reports, care teams, medical devices, and organizational entities. The expansion explicitly excludes Foundation (conformance/metadata), Financial (billing/claims), and Specialized (research/regulatory) resources to maintain focus on direct clinical care documentation.
+
+## Scope: 55 Clinical + Base Resources
+
+### Currently Supported (7)
+Patient, Observation, Condition, MedicationRequest, Procedure, AllergyIntolerance, Encounter
+
+### Clinical - Summary (4 new)
+AdverseEvent, FamilyMemberHistory, ClinicalImpression, DetectedIssue
+
+### Clinical - Diagnostics (7 new)
+DiagnosticReport, Media, Specimen, BodyStructure, ImagingStudy, QuestionnaireResponse, MolecularSequence
+
+### Clinical - Medications (8 new)
+Immunization, MedicationAdministration, MedicationDispense, MedicationStatement, Medication, MedicationKnowledge, ImmunizationEvaluation, ImmunizationRecommendation
+
+### Clinical - Care Provision (8 new)
+CarePlan, CareTeam, Goal, ServiceRequest, NutritionOrder, VisionPrescription, RiskAssessment, RequestGroup
+
+### Clinical - Request & Response (4 new)
+Communication, CommunicationRequest, DeviceRequest, DeviceUseStatement
+
+### Base - Individuals (5 new)
+Practitioner, PractitionerRole, RelatedPerson, Person, Group
+
+### Base - Entities (9 new)
+Organization, OrganizationAffiliation, HealthcareService, Endpoint, Location, Substance, BiologicallyDerivedProduct, Device, DeviceMetric
+
+### Base - Management (3 new)
+EpisodeOfCare, Flag, List
+
+**Total: 55 resources (48 new)**
+
+## Acceptance Criteria (AC)
+
+- **AC1:** The `CORE_RESOURCES` list in `src/fhir_doc_tool/cli.py` includes all 55 clinical and base resources, excluding Foundation, Financial, and Specialized resources.
+- **AC2:** Running `fhir-doc index` successfully downloads and caches StructureDefinitions for all 55 resources.
+- **AC3:** The `RESOURCE_MAP` in `src/validator/fhir_validator.py` includes Python model mappings for all 55 resource types.
+- **AC4:** The FHIRValidator correctly instantiates valid resources of all 55 types and rejects invalid ones with appropriate error messages.
+- **AC5:** The Clinical Analyst Agent can query the MCP server for schema definitions of any of the 55 resources.
+- **AC6:** End-to-end integration test demonstrates extraction of at least 15 different resource types from a comprehensive clinical note covering conditions, medications, procedures, care plans, diagnostics, care team, and organizational context.
+- **AC7:** All documentation (SDD, ARCHITECTURE, README) is updated to reflect the expanded 55-resource scope and explicitly document the exclusion of non-clinical resource categories.
+
+## Test Description (TDD - Commit 1)
+
+- `test_all_55_resources_indexed`: Verifies that all 55 clinical + base resources have corresponding `.profile.json` and `.summary.json` files in `data/fhir_docs/` after indexing.
+- `test_validator_supports_all_resources`: Parameterized test that verifies `FHIRValidator` can successfully instantiate each of the 55 resource types from valid dictionaries.
+- `test_validator_rejects_invalid_resources`: Verifies that invalid data for each resource category is properly rejected with error messages.
+- `test_comprehensive_clinical_note_extraction`: Integration test using a synthetic clinical note (`data/notes/comprehensive.txt`) that contains clinical content triggering extraction of 15+ different resource types including Patient, Practitioner, Organization, Encounter, Condition, MedicationRequest, Observation, DiagnosticReport, Procedure, CarePlan, CareTeam, Goal, AllergyIntolerance, FamilyMemberHistory, and Immunization.
+- `test_mcp_serves_all_55_resources`: Verifies the MCP server can successfully serve schema definitions for all 55 resources via the `get_resource_definition` tool.

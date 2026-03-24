@@ -91,3 +91,89 @@ async def test_mcp_field_lookup():
     )
     element = json.loads(result[0].text)
     assert element.get("path") == "Patient.active"
+
+
+def test_all_55_clinical_resources_indexed():
+    """Phase 6 AC1, AC2: Verify all 55 clinical + base resources are indexed."""
+    # List of all 55 clinical and base resources that should be supported
+    ALL_55_RESOURCES = [
+        # Currently supported (7)
+        "Patient",
+        "Observation",
+        "Condition",
+        "MedicationRequest",
+        "Procedure",
+        "AllergyIntolerance",
+        "Encounter",
+        # Clinical - Summary (4 new)
+        "AdverseEvent",
+        "FamilyMemberHistory",
+        "ClinicalImpression",
+        "DetectedIssue",
+        # Clinical - Diagnostics (7 new)
+        "DiagnosticReport",
+        "Media",
+        "Specimen",
+        "BodyStructure",
+        "ImagingStudy",
+        "QuestionnaireResponse",
+        "MolecularSequence",
+        # Clinical - Medications (8 new)
+        "Immunization",
+        "MedicationAdministration",
+        "MedicationDispense",
+        "MedicationStatement",
+        "Medication",
+        "MedicationKnowledge",
+        "ImmunizationEvaluation",
+        "ImmunizationRecommendation",
+        # Clinical - Care Provision (8 new)
+        "CarePlan",
+        "CareTeam",
+        "Goal",
+        "ServiceRequest",
+        "NutritionOrder",
+        "VisionPrescription",
+        "RiskAssessment",
+        "RequestGroup",
+        # Clinical - Request & Response (4 new)
+        "Communication",
+        "CommunicationRequest",
+        "DeviceRequest",
+        "DeviceUseStatement",
+        # Base - Individuals (5 new)
+        "Practitioner",
+        "PractitionerRole",
+        "RelatedPerson",
+        "Person",
+        "Group",
+        # Base - Entities (9 new)
+        "Organization",
+        "OrganizationAffiliation",
+        "HealthcareService",
+        "Endpoint",
+        "Location",
+        "Substance",
+        "BiologicallyDerivedProduct",
+        "Device",
+        "DeviceMetric",
+        # Base - Management (3 new)
+        "EpisodeOfCare",
+        "Flag",
+        "List",
+    ]
+
+    # This test will fail until we update CORE_RESOURCES and run indexing
+    data_dir = Path("data/fhir_docs")
+
+    missing_resources = []
+    for resource in ALL_55_RESOURCES:
+        profile_file = data_dir / f"{resource}.profile.json"
+        summary_file = data_dir / f"{resource}.summary.json"
+
+        if not profile_file.exists() or not summary_file.exists():
+            missing_resources.append(resource)
+
+    assert len(missing_resources) == 0, (
+        f"Missing indexed resources: {missing_resources}"
+    )

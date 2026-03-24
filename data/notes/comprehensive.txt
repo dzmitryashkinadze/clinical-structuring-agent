@@ -1,0 +1,226 @@
+COMPREHENSIVE CLINICAL NOTE
+Date: 2024-03-15
+Encounter Type: Outpatient Follow-up Visit
+
+PATIENT INFORMATION
+Name: Sarah Martinez
+DOB: 1965-08-12 (58 years old)
+Gender: Female
+MRN: 987654321
+
+EMERGENCY CONTACT
+Name: Carlos Martinez (Husband)
+Relationship: Spouse
+Phone: 555-0123
+
+CARE TEAM
+Primary Care Provider: Dr. Emily Chen, MD
+Internal Medicine, City Health Clinic
+Phone: 555-1000
+
+Endocrinologist: Dr. Robert Kim, MD
+Diabetes Center, Metropolitan Hospital
+Phone: 555-2000
+
+Care Coordinator: Jennifer Williams, RN
+City Health Clinic
+
+FACILITY INFORMATION
+Location: City Health Clinic
+Address: 123 Main Street, Suite 200
+Organization: Metropolitan Health System
+
+CHIEF COMPLAINT
+Follow-up for diabetes management and hypertension control
+
+HISTORY OF PRESENT ILLNESS
+Patient presents for routine follow-up of type 2 diabetes mellitus and essential hypertension. She reports good compliance with medications and diet modifications. Blood glucose readings at home have ranged from 110-140 mg/dL fasting. She denies any hypoglycemic episodes, chest pain, shortness of breath, or peripheral edema. Reports mild occasional headaches, typically related to stress.
+
+PAST MEDICAL HISTORY
+1. Type 2 Diabetes Mellitus - diagnosed 2015
+2. Essential Hypertension - diagnosed 2018
+3. Hyperlipidemia - diagnosed 2019
+4. Gastroesophageal Reflux Disease (GERD) - diagnosed 2020
+5. Osteoarthritis of bilateral knees - diagnosed 2021
+
+FAMILY HISTORY
+Father: Deceased at age 72 from myocardial infarction, history of type 2 diabetes
+Mother: Living, age 85, history of hypertension and osteoporosis
+Sister: Living, age 55, diagnosed with breast cancer in 2022
+
+ALLERGIES
+1. Penicillin - Rash, hives (documented 2010)
+2. Sulfa drugs - Severe allergic reaction with facial swelling (documented 2012)
+
+ADVERSE EVENTS
+Previous hospitalization in January 2024 for acute kidney injury secondary to dehydration. Event resolved with IV hydration. Creatinine normalized within 48 hours.
+
+CURRENT MEDICATIONS
+1. Metformin 1000mg PO twice daily - for diabetes
+2. Lisinopril 20mg PO once daily - for hypertension
+3. Atorvastatin 40mg PO once nightly - for hyperlipidemia
+4. Omeprazole 20mg PO once daily - for GERD
+5. Aspirin 81mg PO once daily - for cardiovascular prophylaxis
+
+IMMUNIZATION HISTORY
+1. Influenza vaccine - administered 2023-10-15
+2. Pneumococcal vaccine (PPSV23) - administered 2023-11-01
+3. COVID-19 booster (Moderna) - administered 2023-09-20
+4. Tetanus-Diphtheria booster - administered 2020-06-10
+
+VITAL SIGNS (Today)
+Blood Pressure: 138/82 mmHg (Right arm, seated)
+Heart Rate: 76 bpm
+Respiratory Rate: 16 breaths/min
+Temperature: 98.2°F (36.8°C)
+Weight: 165 lbs (74.8 kg)
+Height: 5'4" (162.6 cm)
+BMI: 28.3 kg/m²
+Oxygen Saturation: 98% on room air
+
+PHYSICAL EXAMINATION
+General: Alert and oriented, appears well-nourished and in no acute distress
+HEENT: Normocephalic, atraumatic. Pupils equal, round, reactive to light. Throat clear.
+Cardiovascular: Regular rate and rhythm, no murmurs, rubs, or gallops
+Respiratory: Clear to auscultation bilaterally, no wheezes or crackles
+Abdomen: Soft, non-tender, non-distended, normal bowel sounds
+Extremities: No edema, pulses 2+ bilaterally. Mild crepitus noted in bilateral knees
+Neurological: Cranial nerves II-XII intact, sensation intact to light touch
+
+LABORATORY RESULTS (From 2024-03-10)
+Complete Metabolic Panel:
+- Glucose (fasting): 118 mg/dL (Normal: 70-99)
+- Hemoglobin A1C: 7.2% (Goal: <7.0%)
+- Creatinine: 0.9 mg/dL (Normal: 0.6-1.2)
+- eGFR: 85 mL/min/1.73m² (Normal: >60)
+- Total Cholesterol: 185 mg/dL
+- LDL Cholesterol: 95 mg/dL (Goal: <100)
+- HDL Cholesterol: 55 mg/dL
+- Triglycerides: 150 mg/dL
+
+Complete Blood Count:
+- WBC: 7.2 K/uL (Normal: 4.5-11.0)
+- Hemoglobin: 13.8 g/dL (Normal: 12.0-16.0)
+- Hematocrit: 41% (Normal: 36-48)
+- Platelets: 245 K/uL (Normal: 150-400)
+
+Urinalysis:
+- Protein: Negative
+- Glucose: Trace
+- Ketones: Negative
+- Microalbumin/Creatinine Ratio: 25 mg/g (Normal: <30)
+
+DIAGNOSTIC IMAGING
+Chest X-ray (2024-02-20): Clear lung fields, normal cardiac silhouette
+Knee X-rays bilateral (2024-01-15): Mild degenerative joint disease, no acute fractures
+
+ASSESSMENT
+1. Type 2 Diabetes Mellitus (E11.9) - Moderately controlled, A1C slightly above goal
+2. Essential Hypertension (I10) - Controlled on current medication
+3. Hyperlipidemia (E78.5) - Well controlled on statin therapy
+4. GERD (K21.9) - Stable on PPI therapy
+5. Osteoarthritis of bilateral knees (M17.0) - Chronic, managed conservatively
+
+CLINICAL IMPRESSION
+58-year-old female with multiple chronic conditions including type 2 diabetes, hypertension, and hyperlipidemia. Overall disease control is acceptable, though diabetes management could be optimized. Patient is adherent to medications and engaged in self-care. No acute concerns identified today.
+
+PLAN
+
+1. DIABETES MANAGEMENT
+   - Increase Metformin to 1000mg PO three times daily (with meals)
+   - Continue home glucose monitoring fasting and 2 hours post-prandial
+   - Reinforce carbohydrate counting and portion control
+   - Repeat A1C in 3 months
+   - Refer to diabetes education program for refresher course
+   - Goal: A1C <7.0%
+
+2. HYPERTENSION
+   - Continue Lisinopril 20mg PO daily
+   - Advised to reduce sodium intake (<2000mg/day)
+   - Continue home blood pressure monitoring
+   - Recheck in 3 months
+
+3. HYPERLIPIDEMIA
+   - Continue Atorvastatin 40mg PO nightly
+   - Repeat lipid panel in 6 months
+
+4. OSTEOARTHRITIS
+   - Continue conservative management with OTC acetaminophen as needed
+   - Recommend low-impact exercise (swimming, cycling)
+   - Consider physical therapy referral if symptoms worsen
+   - Topical NSAIDs for breakthrough pain
+
+5. PREVENTIVE CARE
+   - Schedule mammography (last done 2022-11-10, due now)
+   - Schedule colonoscopy (last done 2019-03-15, due in 2025)
+   - Continue annual diabetic eye exam (last done 2023-09-05)
+   - Continue annual foot exam for diabetic neuropathy screening
+
+6. CARE COORDINATION
+   - Care plan updated and shared with Dr. Kim (Endocrinology)
+   - Patient enrolled in chronic disease management program
+   - Care coordinator to follow up in 2 weeks regarding diabetes education enrollment
+   - Patient provided with written care plan and medication list
+
+RISK ASSESSMENT
+Cardiovascular Risk: Moderate (diabetes, hypertension, family history)
+10-year ASCVD Risk: 12.5% (per ACC/AHA calculator)
+Fall Risk: Low (no balance issues, no dizziness)
+Diabetic Complications Risk: Moderate (A1C slightly elevated, good kidney function)
+
+GOALS OF CARE (Patient-Centered)
+1. Reduce A1C to below 7.0% within 6 months
+2. Maintain blood pressure below 130/80 mmHg
+3. Reduce weight by 10 pounds through diet and exercise over next 6 months
+4. Improve knee pain to allow for 30 minutes of daily walking
+5. Prevent cardiovascular events and diabetic complications
+
+PATIENT EDUCATION PROVIDED
+- Reviewed medication changes (increased Metformin dose)
+- Discussed signs/symptoms of hypoglycemia and hyperglycemia
+- Reinforced importance of medication adherence
+- Provided dietary counseling materials (low sodium, carbohydrate counting)
+- Discussed exercise recommendations
+- Reviewed foot care for diabetes
+- Patient verbalized understanding
+
+COMMUNICATION
+Phone call placed to Dr. Kim (Endocrinology) to discuss medication adjustment - collaborative agreement reached
+Care plan summary sent via secure messaging to care coordinator Jennifer Williams
+Patient provided with after-visit summary and medication reconciliation list
+
+FOLLOW-UP
+Return to clinic in 3 months (June 2024) for diabetes and hypertension follow-up
+Earlier if symptoms worsen or concerns arise
+Labs to be drawn 1 week prior to next visit
+
+PRESCRIPTIONS
+1. Metformin 1000mg PO TID - 90-day supply with 3 refills
+2. Lisinopril 20mg PO daily - 90-day supply with 3 refills
+3. Atorvastatin 40mg PO nightly - 90-day supply with 3 refills
+4. Omeprazole 20mg PO daily - 90-day supply with 3 refills
+5. Aspirin 81mg PO daily - continue over-the-counter
+
+MEDICAL DEVICES
+Patient uses:
+- Glucometer (OneTouch Ultra 2) for home blood glucose monitoring - testing 2x daily
+- Blood pressure monitor (Omron 7 Series) for home BP monitoring - testing weekly
+- Continuous glucose monitor prescribed but patient declined due to cost
+
+REFERRALS/ORDERS
+1. Order: Diabetes Self-Management Education (DSME) - 4 sessions
+2. Order: Mammography - screening
+3. Order: Hemoglobin A1C - in 3 months (June 2024)
+4. Order: Comprehensive Metabolic Panel - in 3 months (June 2024)
+5. Referral: Physical therapy evaluation for knee osteoarthritis (if conservative measures fail)
+
+CLINICAL ALERTS/FLAGS
+- Flag: High cardiovascular risk - requires aggressive risk factor modification
+- Flag: Diabetes with suboptimal control - intensified monitoring recommended
+- Flag: Penicillin allergy - alternative antibiotics required if infection develops
+
+EPISODE OF CARE
+This visit is part of an ongoing episode of chronic disease management initiated in 2015 with diabetes diagnosis. Patient has established care with both primary care and endocrinology, with coordinated treatment plans. Care coordinator actively monitors patient progress and facilitates communication between providers.
+
+Provider: Dr. Emily Chen, MD
+Electronically signed: 2024-03-15 15:30 PST
