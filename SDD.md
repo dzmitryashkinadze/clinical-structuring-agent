@@ -92,3 +92,23 @@ A command-line interface (CLI) to process a single clinical note (`.txt`, `.md` 
 - `test_validator_failure_dropped`: Verifies an invalid dictionary (missing required FHIR fields) logs an error and is dropped from the result list.
 - `test_cli_process_text`: Mocks the agent and verifies the CLI handles `--text` and `--out` arguments correctly.
 - `test_cli_process_file`: Mocks the agent and verifies the CLI reads a file correctly.
+
+---
+
+# SDD: Multi-Agent Validation & Self-Correction (Phase 5)
+
+## Feature Description
+An advanced multi-agent orchestration loop to maximize extraction accuracy. A primary Extractor Agent (Gemini) generates FHIR resources. A deterministic Python `FHIRValidator` tags each object as `VALID` or `INVALID` with specific schema errors. This entire package (note, extracted objects, error traces) is evaluated by a secondary Validator Agent (Claude 3.5 Sonnet). The Validator Agent decides whether to accept the bundle or generate comprehensive feedback, which is fed back to the Extractor Agent for up to 3 retries.
+
+## Acceptance Criteria (AC)
+- **AC1:** `FHIRValidator` is updated to return detailed validation reports (Status + Errors) instead of just dropping invalid resources.
+- **AC2:** A new `ValidatorAgent` powered by Claude 3.5 Sonnet evaluates the Extractor's output and the Python validation report.
+- **AC3:** The `ValidatorAgent` outputs a `ValidationDecision` (boolean `accepted`, string `feedback`).
+- **AC4:** The `ClinicalAnalystAgent` orchestrates a retry loop (max 3 times), appending the Validator's feedback to its prompt history if rejected.
+- **AC5:** The loop breaks early if the Validator accepts the bundle, returning only the resources tagged as `VALID` by Pydantic.
+- **AC6:** Unit tests mock a rejection loop and verify the message history correctly appends the feedback and retries.
+
+## Test Description (TDD - Commit 1)
+- `test_fhir_validator_report`: Verifies the Python validator correctly tags VALID/INVALID status and captures error strings.
+- `test_validator_agent_decision`: Mocks the Claude agent to ensure it returns a structured `ValidationDecision`.
+- `test_agent_orchestration_loop`: Verifies the Extractor loop retries up to `MAX_RETRIES` when rejected, and exits early when accepted.

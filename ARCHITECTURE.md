@@ -29,10 +29,12 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Output:** Structured `Coding` arrays for `CodeableConcept` fields.
 
 ### 4. Validator & CLI (`src/validator/`, `src/main.py`)
-- **Purpose:** Final schema enforcement and CLI orchestration.
+- **Purpose:** Final schema enforcement, multi-agent evaluation, and CLI orchestration.
 - **Logic:**
     - `main.py`: `click`-based CLI to process single notes (`--text` or `--file`) and output valid FHIR JSON to `stdout` or `--out`.
-    - `fhir_validator.py`: Wrapper for `fhir.resources` instantiation. Catches `ValidationError`s, drops invalid resources, and logs formatting issues (preparing for a future self-correction loop).
+    - `fhir_validator.py`: Python module that strictly evaluates LLM outputs against `fhir.resources`, generating a detailed report (VALID/INVALID + error strings) for each object.
+    - `agent.py`: A secondary **Validator Agent** powered by **Anthropic Claude 3.5 Sonnet**. It consumes the Extractor's context and the Python validation report. It outputs a `ValidationDecision` (Accept/Reject) and detailed feedback.
+- **Feedback Loop:** If rejected, the Extractor Agent receives the Validator's feedback and retries (up to 3 times).
 - **Output:** A strict array of validated `fhir.resources` models.
 
 ## Data Flow
