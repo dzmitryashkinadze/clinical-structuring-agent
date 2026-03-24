@@ -1,40 +1,89 @@
+"""
+Clinical Analyst Agent for FHIR extraction.
+
+This module implements the primary extraction agent that transforms unstructured
+clinical notes into validated FHIR R4 resources. Uses Gemini 3 Flash with dynamic
+schema lookup via MCP and integrates terminology standardization.
+
+Main components:
+- ExtractionResult: Pydantic model for agent output
+- ClinicalAnalystAgent: Primary agent class with multi-agent validation loop
+
+Dependencies:
+- pydantic-ai: Agent framework
+- Google Gemini: LLM for extraction
+- MCP: Schema lookup
+- NCI EVS: Terminology standardization
+"""
+
 import asyncio
 import logging
 from typing import List, Dict, Any, Union, Optional
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.google import GoogleModel
+from pydantic_ai.providers.google import GoogleProvider
 from fhir.resources.patient import Patient
 from fhir.resources.observation import Observation
 from fhir.resources.condition import Condition
 from fhir.resources.encounter import Encounter
+import json
+
 from .config import settings
 from .mcp_client import FHIRDocClient
 from src.standardizer.nci_client import NCIClient, TerminologyMatch
-import json
+from src.validator.fhir_validator import FHIRValidator
+from src.validator.agent import ValidatorAgent, ValidationDecision
+from src.utils.prompt_loader import load_prompt, PromptLoadError
 
-# Setup logging
-logging.basicConfig(level=settings.LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
 
 class ExtractionResult(BaseModel):
-    """Result of the FHIR extraction. MUST be valid JSON string."""
+    """
+    Result container for FHIR extraction output.
+
+    The agent returns extracted FHIR resources as a JSON string
+    to avoid issues with complex nested objects in Pydantic AI.
+
+    Attributes:
+        fhir_json_bundle: JSON string containing array of FHIR resources
+    """
 
     fhir_json_bundle: str = Field(
         description="A JSON string representing an array of FHIR resources."
     )
 
 
-from pydantic_ai.providers.google import GoogleProvider
-
-
-from src.validator.fhir_validator import FHIRValidator
-from src.validator.agent import ValidatorAgent, ValidationDecision
-
-
 class ClinicalAnalystAgent:
-    """AC5: Agent that identifies, lookups, and extracts FHIR resources from clinical notes."""
+    """
+    Primary extraction agent that transforms clinical notes into FHIR resources.
+
+    Uses Gemini 3 Flash with dynamic schema lookup via MCP to extract
+    structured FHIR data from unstructured clinical text. Integrates
+    with terminology services for code standardization and includes
+    a multi-agent validation loop for accuracy.
+
+    The agent follows a "Lookup-then-Extract" flow:
+    1. Lists available FHIR resource types via MCP
+    2. Retrieves relevant schemas for identified resources
+    3. Looks up standardized terminology codes
+    4. Extracts and validates FHIR JSON
+    5. Optionally uses Claude validator for quality assurance
+
+    Attributes:
+        mcp_client: Client for FHIR schema lookups via MCP
+        nci_client: Client for terminology standardization (NCI EVS API)
+        validator: Python FHIR validator for schema compliance
+        validator_agent: Optional Claude-based validation supervisor
+        model: Gemini model instance
+        agent: Pydantic AI agent instance with registered tools
+
+    Example:
+        >>> agent = ClinicalAnalystAgent()
+        >>> resources = await agent.run("Patient John Doe, 45yo, hypertensive")
+        >>> print(f"Extracted {len(resources)} FHIR resources")
+    """
 
     def __init__(
         self,
@@ -42,39 +91,55 @@ class ClinicalAnalystAgent:
         nci_client: Optional[NCIClient] = None,
         validator: Optional[FHIRValidator] = None,
         validator_agent: Optional[ValidatorAgent] = None,
-    ):
+    ) -> None:
+        """
+        Initialize the Clinical Analyst Agent.
+
+        Args:
+            mcp_client: Optional pre-configured MCP client
+            nci_client: Optional pre-configured NCI client
+            validator: Optional pre-configured FHIR validator
+            validator_agent: Optional pre-configured validation agent
+        """
+        logger.debug(
+            f"Initializing ClinicalAnalystAgent with model={settings.GEMINI_MODEL_NAME}"
+        )
+
         self.mcp_client = mcp_client or FHIRDocClient()
         self.nci_client = nci_client or NCIClient()
         self.validator = validator or FHIRValidator()
-        # Only initialize the ValidatorAgent if Anthropic is available
+
+        # Only initialize the ValidatorAgent if Anthropic API key is available
         self.validator_agent = (
             validator_agent
             if validator_agent
             else (ValidatorAgent() if settings.ANTHROPIC_API_KEY else None)
         )
+
+        if not settings.ANTHROPIC_API_KEY:
+            logger.info(
+                "ANTHROPIC_API_KEY not provided - validation loop will use Python-only validation"
+            )
+
+        # Initialize Gemini model
         self.model = GoogleModel(
-            "gemini-3-flash-preview",
+            settings.GEMINI_MODEL_NAME,
             provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
         )
 
+        # Load system prompt from file
+        try:
+            system_prompt = load_prompt("clinical_analyst", settings.PROMPTS_DIR)
+            logger.debug(f"Loaded system prompt (length: {len(system_prompt)} chars)")
+        except PromptLoadError as e:
+            logger.error(f"Failed to load prompt: {e}")
+            raise
+
+        # Initialize agent with loaded prompt
         self.agent = Agent(
             self.model,
             output_type=ExtractionResult,
-            system_prompt=(
-                "You are a Clinical Analyst Agent. Your goal is to transform unstructured clinical notes into HL7 FHIR R4 JSON resources. "
-                "Follow the 'Lookup-then-Extract' flow:\n"
-                "1. Use 'list_available_resources' to see what FHIR types are available.\n"
-                "2. Use 'get_fhir_schema' for the types you identify in the note.\n"
-                "3. Use 'search_terminology' to look up standardized FHIR codes for medical concepts (e.g. SNOMED-CT for conditions, LOINC for observations).\n"
-                "4. Map the note content to valid FHIR JSON.\n\n"
-                "IMPORTANT INSTRUCTIONS:\n"
-                "- Output ONLY a JSON array of fully-populated FHIR resources.\n"
-                "- You must use full nested JSON objects/arrays (e.g., Patient.name is an array of objects).\n"
-                "- Do NOT invent random integers to replace complex objects.\n"
-                "- If a concept can be coded, use 'search_terminology' and put the result in a `CodeableConcept.coding` array.\n"
-                "- If no data is found, output '[]'.\n"
-                "- The result should be provided as a RAW JSON string in the `fhir_json_bundle` field."
-            ),
+            system_prompt=system_prompt,
         )
 
         # Register tools

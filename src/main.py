@@ -1,13 +1,29 @@
+"""
+CLI interface for the FHIR structuring agent.
+
+This module provides command-line access to the FHIR extraction pipeline,
+allowing processing of clinical notes from text or files.
+
+Commands:
+- process: Extract FHIR resources from clinical notes
+
+Usage:
+    python -m src.main process --text "Patient John Doe..."
+    python -m src.main process --file data/notes/note.txt --out output.json
+"""
+
 import click
 import asyncio
 import json
 import logging
+
 from src.clinical_analyst.agent import ClinicalAnalystAgent
 from src.validator.fhir_validator import FHIRValidator
+from src.utils.logging_config import setup_logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
-logger = logging.getLogger("fhir_cli")
+# Setup logging once at module load
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 @click.group()
