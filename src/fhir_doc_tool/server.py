@@ -65,6 +65,49 @@ async def list_resources_handler(arguments: dict) -> list[TextContent]:
     ]
 
 
+def minify_fhir_schema(definition: dict) -> list[dict]:
+    """Phase 1.5 AC1-AC3: Reduce StructureDefinition to bare minimum for LLM context."""
+    snapshot_elements = definition.get("snapshot", {}).get("element", [])
+    minified = []
+
+    for element in snapshot_elements:
+        path = element.get("path", "")
+
+        # Filter out extensions and base IDs
+        if (
+            path.endswith(".extension")
+            or path.endswith(".modifierExtension")
+            or (path.endswith(".id") and path != definition.get("name"))
+        ):
+            continue
+
+        clean_element = {"path": path}
+
+        # Keep only the essentials
+        if "short" in element:
+            clean_element["short"] = element["short"]
+        if "min" in element:
+            clean_element["min"] = element["min"]
+        if "max" in element:
+            clean_element["max"] = element["max"]
+        if "type" in element:
+            clean_element["type"] = [
+                t.get("code") for t in element["type"] if "code" in t
+            ]
+        if "binding" in element:
+            # Provide binding details if they exist to guide the LLM on what codes to use
+            binding = element["binding"]
+            clean_element["binding"] = {
+                "strength": binding.get("strength"),
+                "description": binding.get("description"),
+                "valueSet": binding.get("valueSet"),
+            }
+
+        minified.append(clean_element)
+
+    return minified
+
+
 async def get_definition_handler(arguments: dict) -> list[TextContent]:
     res = arguments.get("resource_name")
     path = DATA_DIR / f"{res}.profile.json"
@@ -72,7 +115,8 @@ async def get_definition_handler(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=f"Resource '{res}' not indexed.")]
     with open(path) as f:
         definition = json.load(f)
-        return [TextContent(type="text", text=json.dumps(definition, indent=2))]
+        minified = minify_fhir_schema(definition)
+        return [TextContent(type="text", text=json.dumps(minified, indent=2))]
 
 
 async def get_field_details_handler(arguments: dict) -> list[TextContent]:
