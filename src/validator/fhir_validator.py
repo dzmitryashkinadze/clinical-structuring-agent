@@ -1,13 +1,80 @@
 import logging
 from typing import List, Dict, Any, Optional
 from pydantic import ValidationError, BaseModel
-from fhir.resources.patient import Patient
-from fhir.resources.observation import Observation
-from fhir.resources.condition import Condition
-from fhir.resources.encounter import Encounter
-from fhir.resources.medicationrequest import MedicationRequest
-from fhir.resources.procedure import Procedure
+
+# Phase 6: All 55 Clinical and Base FHIR R4 Resources
+# Clinical - Summary
+from fhir.resources.adverseevent import AdverseEvent
 from fhir.resources.allergyintolerance import AllergyIntolerance
+from fhir.resources.clinicalimpression import ClinicalImpression
+from fhir.resources.condition import Condition
+from fhir.resources.detectedissue import DetectedIssue
+from fhir.resources.familymemberhistory import FamilyMemberHistory
+from fhir.resources.procedure import Procedure
+
+# Clinical - Diagnostics
+from fhir.resources.bodystructure import BodyStructure
+from fhir.resources.diagnosticreport import DiagnosticReport
+from fhir.resources.imagingstudy import ImagingStudy
+
+# Note: Media resource not available in fhir.resources R4 (deprecated or merged)
+from fhir.resources.molecularsequence import MolecularSequence
+from fhir.resources.observation import Observation
+from fhir.resources.questionnaireresponse import QuestionnaireResponse
+from fhir.resources.specimen import Specimen
+
+# Clinical - Medications
+from fhir.resources.immunization import Immunization
+from fhir.resources.immunizationevaluation import ImmunizationEvaluation
+from fhir.resources.immunizationrecommendation import ImmunizationRecommendation
+from fhir.resources.medication import Medication
+from fhir.resources.medicationadministration import MedicationAdministration
+from fhir.resources.medicationdispense import MedicationDispense
+from fhir.resources.medicationknowledge import MedicationKnowledge
+from fhir.resources.medicationrequest import MedicationRequest
+from fhir.resources.medicationstatement import MedicationStatement
+
+# Clinical - Care Provision
+from fhir.resources.careplan import CarePlan
+from fhir.resources.careteam import CareTeam
+from fhir.resources.goal import Goal
+from fhir.resources.nutritionorder import NutritionOrder
+
+# Note: RequestGroup resource not available in fhir.resources R4
+from fhir.resources.riskassessment import RiskAssessment
+from fhir.resources.servicerequest import ServiceRequest
+from fhir.resources.visionprescription import VisionPrescription
+
+# Clinical - Request & Response
+from fhir.resources.communication import Communication
+from fhir.resources.communicationrequest import CommunicationRequest
+from fhir.resources.devicerequest import DeviceRequest
+# Note: DeviceUseStatement was replaced by DeviceUsage in R5, not available in R4
+
+# Base - Individuals
+from fhir.resources.group import Group
+from fhir.resources.patient import Patient
+from fhir.resources.person import Person
+from fhir.resources.practitioner import Practitioner
+from fhir.resources.practitionerrole import PractitionerRole
+from fhir.resources.relatedperson import RelatedPerson
+
+# Base - Entities
+from fhir.resources.biologicallyderivedproduct import BiologicallyDerivedProduct
+from fhir.resources.device import Device
+from fhir.resources.devicemetric import DeviceMetric
+from fhir.resources.endpoint import Endpoint
+from fhir.resources.healthcareservice import HealthcareService
+from fhir.resources.location import Location
+from fhir.resources.organization import Organization
+from fhir.resources.organizationaffiliation import OrganizationAffiliation
+from fhir.resources.substance import Substance
+
+# Base - Management
+from fhir.resources.encounter import Encounter
+from fhir.resources.episodeofcare import EpisodeOfCare
+from fhir.resources.flag import Flag
+from fhir.resources.list import List as FHIRList
 
 logger = logging.getLogger(__name__)
 
@@ -22,17 +89,74 @@ class ValidationReport(BaseModel):
 
 
 class FHIRValidator:
-    """AC4, Phase 5 AC1: Strict validation wrapper that generates detailed reports."""
+    """AC4, Phase 5 AC1, Phase 6 AC3-AC4: Strict validation wrapper supporting all 55 clinical + base resources."""
 
-    # Mapping of resourceType strings to their corresponding fhir.resources Pydantic models
+    # Phase 6: Mapping of resourceType strings to their corresponding fhir.resources Pydantic models
+    # All 55 Clinical and Base FHIR R4 Resources (alphabetically sorted)
     RESOURCE_MAP = {
-        "Patient": Patient,
-        "Observation": Observation,
-        "Condition": Condition,
-        "Encounter": Encounter,
-        "MedicationRequest": MedicationRequest,
-        "Procedure": Procedure,
+        # Clinical - Summary
+        "AdverseEvent": AdverseEvent,
         "AllergyIntolerance": AllergyIntolerance,
+        "ClinicalImpression": ClinicalImpression,
+        "Condition": Condition,
+        "DetectedIssue": DetectedIssue,
+        "FamilyMemberHistory": FamilyMemberHistory,
+        "Procedure": Procedure,
+        # Clinical - Diagnostics
+        "BodyStructure": BodyStructure,
+        "DiagnosticReport": DiagnosticReport,
+        "ImagingStudy": ImagingStudy,
+        # "Media": Media,  # Not available in fhir.resources R4
+        "MolecularSequence": MolecularSequence,
+        "Observation": Observation,
+        "QuestionnaireResponse": QuestionnaireResponse,
+        "Specimen": Specimen,
+        # Clinical - Medications
+        "Immunization": Immunization,
+        "ImmunizationEvaluation": ImmunizationEvaluation,
+        "ImmunizationRecommendation": ImmunizationRecommendation,
+        "Medication": Medication,
+        "MedicationAdministration": MedicationAdministration,
+        "MedicationDispense": MedicationDispense,
+        "MedicationKnowledge": MedicationKnowledge,
+        "MedicationRequest": MedicationRequest,
+        "MedicationStatement": MedicationStatement,
+        # Clinical - Care Provision
+        "CarePlan": CarePlan,
+        "CareTeam": CareTeam,
+        "Goal": Goal,
+        "NutritionOrder": NutritionOrder,
+        # "RequestGroup": RequestGroup,  # Not available in fhir.resources R4
+        "RiskAssessment": RiskAssessment,
+        "ServiceRequest": ServiceRequest,
+        "VisionPrescription": VisionPrescription,
+        # Clinical - Request & Response
+        "Communication": Communication,
+        "CommunicationRequest": CommunicationRequest,
+        "DeviceRequest": DeviceRequest,
+        # "DeviceUseStatement": DeviceUseStatement,  # Replaced by DeviceUsage in R5
+        # Base - Individuals
+        "Group": Group,
+        "Patient": Patient,
+        "Person": Person,
+        "Practitioner": Practitioner,
+        "PractitionerRole": PractitionerRole,
+        "RelatedPerson": RelatedPerson,
+        # Base - Entities
+        "BiologicallyDerivedProduct": BiologicallyDerivedProduct,
+        "Device": Device,
+        "DeviceMetric": DeviceMetric,
+        "Endpoint": Endpoint,
+        "HealthcareService": HealthcareService,
+        "Location": Location,
+        "Organization": Organization,
+        "OrganizationAffiliation": OrganizationAffiliation,
+        "Substance": Substance,
+        # Base - Management
+        "Encounter": Encounter,
+        "EpisodeOfCare": EpisodeOfCare,
+        "Flag": Flag,
+        "List": FHIRList,  # Note: renamed import to avoid conflict with Python's built-in list
     }
 
     def validate_bundle(self, resources: List[Dict[str, Any]]) -> List[BaseModel]:

@@ -145,7 +145,7 @@ async def test_mcp_serves_all_55_resource_schemas():
     """
     from src.clinical_analyst.mcp_client import FHIRDocClient
 
-    ALL_55_RESOURCES = [
+    ALL_52_RESOURCES = [
         # Currently supported (7)
         "Patient",
         "Observation",
@@ -161,7 +161,7 @@ async def test_mcp_serves_all_55_resource_schemas():
         "DetectedIssue",
         # Clinical - Diagnostics (7 new)
         "DiagnosticReport",
-        "Media",
+        # "Media",  # Not available in fhir.resources R4
         "Specimen",
         "BodyStructure",
         "ImagingStudy",
@@ -184,12 +184,12 @@ async def test_mcp_serves_all_55_resource_schemas():
         "NutritionOrder",
         "VisionPrescription",
         "RiskAssessment",
-        "RequestGroup",
+        # "RequestGroup",  # Not available in fhir.resources R4
         # Clinical - Request & Response (4 new)
         "Communication",
         "CommunicationRequest",
         "DeviceRequest",
-        "DeviceUseStatement",
+        # "DeviceUseStatement",  # Replaced in R5
         # Base - Individuals (5 new)
         "Practitioner",
         "PractitionerRole",
@@ -217,7 +217,7 @@ async def test_mcp_serves_all_55_resource_schemas():
     # Try to query each resource schema
     failed_resources = []
 
-    for resource_name in ALL_55_RESOURCES:
+    for resource_name in ALL_52_RESOURCES:
         try:
             # This will fail if the resource isn't indexed
             schema = await mcp_client.get_resource_definition(resource_name)

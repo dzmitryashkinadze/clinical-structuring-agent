@@ -1,10 +1,10 @@
 # Agentic AI EHR-to-FHIR Extraction
 
-An agentic pipeline that transforms unstructured clinical notes into valid, interoperable FHIR R4 Python objects and JSON. **Supports 55 clinical and base resource types** covering the full spectrum of patient care documentation.
+An agentic pipeline that transforms unstructured clinical notes into valid, interoperable FHIR R4 Python objects and JSON. **Supports 52 clinical and base resource types** covering the full spectrum of patient care documentation.
 
 ## Features
 
-- **Comprehensive Resource Coverage:** Supports all 55 clinical and base FHIR R4 resources (conditions, medications, procedures, diagnostics, care plans, care teams, organizations, and more)
+- **Comprehensive Resource Coverage:** Supports all 52 clinical and base FHIR R4 resources (3 excluded: Media, RequestGroup, DeviceUseStatement - not available in fhir.resources) (conditions, medications, procedures, diagnostics, care plans, care teams, organizations, and more)
 - **Multi-Agent Architecture:** Primary extraction agent (Gemini 3 Flash) + Validator agent (Claude Sonnet 4.6) with self-correction loop
 - **Clinical Analyst Agent:** Parses clinical notes and maps them to FHIR resources using dynamic schema lookup
 - **Terminology Mapping:** Free NCI EVS API integration for SNOMED-CT/LOINC standardization (no API key required)
@@ -24,7 +24,7 @@ An agentic pipeline that transforms unstructured clinical notes into valid, inte
     - Copy `.env.example` to `.env`.
     - Provide your **NLM Terminology Service (UMLS)** API key.
 
-## Supported FHIR Resources (55 Total)
+## Supported FHIR Resources (52 Total)
 
 ### Clinical Resources
 

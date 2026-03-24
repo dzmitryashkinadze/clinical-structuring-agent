@@ -3,7 +3,7 @@
 ## Overview
 The system is a modular pipeline that transforms unstructured clinical notes into validated HL7 FHIR R4 resources. It separates the **Source of Truth (Documentation)** from the **Processing Logic (Agents)**.
 
-**Supported Resources:** 55 Clinical and Base FHIR R4 resources covering patient demographics, clinical conditions, medications, procedures, diagnostics, care planning, care teams, and organizational entities. Foundation (conformance), Financial (billing), and Specialized (research) resources are explicitly excluded to maintain focus on direct clinical care.
+**Supported Resources:** 52 Clinical and Base FHIR R4 resources (3 excluded: Media, RequestGroup, DeviceUseStatement) covering patient demographics, clinical conditions, medications, procedures, diagnostics, care planning, care teams, and organizational entities. Foundation (conformance), Financial (billing), and Specialized (research) resources are explicitly excluded to maintain focus on direct clinical care.
 
 ## Core Components
 
@@ -12,8 +12,8 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Interfaces:**
     - **CLI:** For manual indexing (`index`), listing (`list`), and querying (`query`).
     - **MCP Server:** For LLM agents to fetch schema definitions in real-time.
-- **Storage:** Local cache in `data/fhir_docs/` containing 55 clinical + base resource StructureDefinitions.
-- **Coverage:** 55 resources across 8 categories: Clinical Summary (7), Diagnostics (8), Medications (9), Care Provision (8), Request & Response (4), Individuals (6), Entities (10), Management (4).
+- **Storage:** Local cache in `data/fhir_docs/` containing 52 clinical + base resource StructureDefinitions.
+- **Coverage:** 52 resources across 8 categories: Clinical Summary (7), Diagnostics (8), Medications (9), Care Provision (8), Request & Response (4), Individuals (6), Entities (10), Management (4).
 
 ### 2. Clinical Analyst Agent (`src/clinical_analyst/`)
 - **Purpose:** Extraction agent powered by **Pydantic AI** and **Gemini 3 Flash**.
@@ -35,10 +35,10 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Purpose:** Final schema enforcement, multi-agent evaluation, and CLI orchestration.
 - **Logic:**
     - `main.py`: `click`-based CLI to process single notes (`--text` or `--file`) and output valid FHIR JSON to `stdout` or `--out`.
-    - `fhir_validator.py`: Python module that strictly evaluates LLM outputs against `fhir.resources`, generating a detailed report (VALID/INVALID + error strings) for each object. **Supports all 55 clinical + base resource types.**
+    - `fhir_validator.py`: Python module that strictly evaluates LLM outputs against `fhir.resources`, generating a detailed report (VALID/INVALID + error strings) for each object. **Supports all 52 clinical + base resource types.**
     - `agent.py`: A secondary **Validator Agent** powered by **Anthropic Claude Sonnet 4.6**. It consumes the Extractor's context and the Python validation report. It outputs a `ValidationDecision` (Accept/Reject) and detailed feedback.
 - **Feedback Loop:** If rejected, the Extractor Agent receives the Validator's feedback and retries (up to 3 times).
-- **Output:** A strict array of validated `fhir.resources` models across any of the 55 supported resource types.
+- **Output:** A strict array of validated `fhir.resources` models across any of the 52 supported resource types.
 
 ## Data Flow
 `Raw Note` -> `Clinical Analyst (w/ Doc Tool)` -> `Standardizer` -> `Validator` -> `Output JSON`

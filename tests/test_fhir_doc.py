@@ -93,10 +93,10 @@ async def test_mcp_field_lookup():
     assert element.get("path") == "Patient.active"
 
 
-def test_all_55_clinical_resources_indexed():
-    """Phase 6 AC1, AC2: Verify all 55 clinical + base resources are indexed."""
+def test_all_52_clinical_resources_indexed():
+    """Phase 6 AC1, AC2: Verify all 52 clinical + base resources are indexed."""
     # List of all 55 clinical and base resources that should be supported
-    ALL_55_RESOURCES = [
+    ALL_52_RESOURCES = [
         # Currently supported (7)
         "Patient",
         "Observation",
@@ -110,9 +110,9 @@ def test_all_55_clinical_resources_indexed():
         "FamilyMemberHistory",
         "ClinicalImpression",
         "DetectedIssue",
-        # Clinical - Diagnostics (7 new)
+        # Clinical - Diagnostics (6 new)
         "DiagnosticReport",
-        "Media",
+        # "Media",  # Not available in fhir.resources R4
         "Specimen",
         "BodyStructure",
         "ImagingStudy",
@@ -127,7 +127,7 @@ def test_all_55_clinical_resources_indexed():
         "MedicationKnowledge",
         "ImmunizationEvaluation",
         "ImmunizationRecommendation",
-        # Clinical - Care Provision (8 new)
+        # Clinical - Care Provision (7 new)
         "CarePlan",
         "CareTeam",
         "Goal",
@@ -135,12 +135,12 @@ def test_all_55_clinical_resources_indexed():
         "NutritionOrder",
         "VisionPrescription",
         "RiskAssessment",
-        "RequestGroup",
-        # Clinical - Request & Response (4 new)
+        # "RequestGroup",  # Not available in fhir.resources R4
+        # Clinical - Request & Response (3 new)
         "Communication",
         "CommunicationRequest",
         "DeviceRequest",
-        "DeviceUseStatement",
+        # "DeviceUseStatement",  # Replaced in R5
         # Base - Individuals (5 new)
         "Practitioner",
         "PractitionerRole",
@@ -167,7 +167,7 @@ def test_all_55_clinical_resources_indexed():
     data_dir = Path("data/fhir_docs")
 
     missing_resources = []
-    for resource in ALL_55_RESOURCES:
+    for resource in ALL_52_RESOURCES:
         profile_file = data_dir / f"{resource}.profile.json"
         summary_file = data_dir / f"{resource}.summary.json"
 

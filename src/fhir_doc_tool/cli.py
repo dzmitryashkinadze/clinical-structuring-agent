@@ -6,17 +6,73 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 DATA_DIR = Path("data/fhir_docs")
+
+# Phase 6: All 55 Clinical and Base FHIR R4 Resources
+# Excludes: Foundation (conformance), Financial (billing), Specialized (research)
 CORE_RESOURCES = [
-    "Patient",
-    "Observation",
-    "Condition",
-    "MedicationRequest",
-    "Procedure",
+    # Clinical - Summary (7)
+    "AdverseEvent",
     "AllergyIntolerance",
-    "Encounter",
+    "ClinicalImpression",
+    "Condition",
+    "DetectedIssue",
     "FamilyMemberHistory",
+    "Procedure",
+    # Clinical - Diagnostics (7) - Media not available in R4
+    "BodyStructure",
     "DiagnosticReport",
+    "ImagingStudy",
+    # "Media",  # Not available in fhir.resources R4
+    "MolecularSequence",
+    "Observation",
+    "QuestionnaireResponse",
+    "Specimen",
+    # Clinical - Medications (9)
     "Immunization",
+    "ImmunizationEvaluation",
+    "ImmunizationRecommendation",
+    "Medication",
+    "MedicationAdministration",
+    "MedicationDispense",
+    "MedicationKnowledge",
+    "MedicationRequest",
+    "MedicationStatement",
+    # Clinical - Care Provision (7) - RequestGroup not available in R4
+    "CarePlan",
+    "CareTeam",
+    "Goal",
+    "NutritionOrder",
+    # "RequestGroup",  # Not available in fhir.resources R4
+    "RiskAssessment",
+    "ServiceRequest",
+    "VisionPrescription",
+    # Clinical - Request & Response (3) - DeviceUseStatement replaced in R5
+    "Communication",
+    "CommunicationRequest",
+    "DeviceRequest",
+    # "DeviceUseStatement",  # Replaced by DeviceUsage in R5
+    # Base - Individuals (6)
+    "Group",
+    "Patient",
+    "Person",
+    "Practitioner",
+    "PractitionerRole",
+    "RelatedPerson",
+    # Base - Entities (10)
+    "BiologicallyDerivedProduct",
+    "Device",
+    "DeviceMetric",
+    "Endpoint",
+    "HealthcareService",
+    "Location",
+    "Organization",
+    "OrganizationAffiliation",
+    "Substance",
+    # Base - Management (4)
+    "Encounter",
+    "EpisodeOfCare",
+    "Flag",
+    "List",
 ]
 
 
