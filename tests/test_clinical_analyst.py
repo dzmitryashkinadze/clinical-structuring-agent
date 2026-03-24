@@ -24,7 +24,7 @@ async def test_agent_empty_note(mocker):
     mocker.patch("pydantic_ai.Agent.run", new_callable=AsyncMock)
     import pydantic_ai
 
-    pydantic_ai.Agent.run.return_value.output = ExtractionResult(resources=[])
+    pydantic_ai.Agent.run.return_value.output = ExtractionResult(fhir_json_bundle="[]")
 
     agent = ClinicalAnalystAgent()
     result = await agent.run("Hello, this is just a normal conversation.")
@@ -37,7 +37,7 @@ async def test_agent_mcp_integration(mocker):
     # Mock the internal agent's run to return some resource
     mock_run = mocker.patch("pydantic_ai.Agent.run", new_callable=AsyncMock)
     mock_run.return_value.output = ExtractionResult(
-        resources=[{"resourceType": "Patient", "id": "123"}]
+        fhir_json_bundle='[{"resourceType": "Patient", "id": "123"}]'
     )
 
     # Mock FHIRDocClient
@@ -64,7 +64,7 @@ async def test_agent_validation_error_handling(mocker):
     mock_run = mocker.patch("pydantic_ai.Agent.run", new_callable=AsyncMock)
     # Patient with invalid gender (say it's an integer instead of string)
     mock_run.return_value.output = ExtractionResult(
-        resources=[{"resourceType": "Patient", "gender": 123}]
+        fhir_json_bundle='[{"resourceType": "Patient", "gender": 123}]'
     )
 
     agent = ClinicalAnalystAgent()

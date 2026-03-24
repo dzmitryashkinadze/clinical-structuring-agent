@@ -28,8 +28,12 @@ The system is a modular pipeline that transforms unstructured clinical notes int
     - Resolves raw clinical terms to standard ontologies (e.g., SNOMED-CT, LOINC) without requiring an API key.
 - **Output:** Structured `Coding` arrays for `CodeableConcept` fields.
 
-### 4. Validator (`src/validator/`)
-- **Purpose:** (Future) Schema enforcement and feedback loops.
+### 4. Validator & CLI (`src/validator/`, `src/main.py`)
+- **Purpose:** Final schema enforcement and CLI orchestration.
+- **Logic:**
+    - `main.py`: `click`-based CLI to process single notes (`--text` or `--file`) and output valid FHIR JSON to `stdout` or `--out`.
+    - `fhir_validator.py`: Wrapper for `fhir.resources` instantiation. Catches `ValidationError`s, drops invalid resources, and logs formatting issues (preparing for a future self-correction loop).
+- **Output:** A strict array of validated `fhir.resources` models.
 
 ## Data Flow
 `Raw Note` -> `Clinical Analyst (w/ Doc Tool)` -> `Standardizer` -> `Validator` -> `Output JSON`

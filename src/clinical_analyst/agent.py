@@ -29,6 +29,9 @@ class ExtractionResult(BaseModel):
 from pydantic_ai.providers.google import GoogleProvider
 
 
+from src.validator.fhir_validator import FHIRValidator
+
+
 class ClinicalAnalystAgent:
     """AC5: Agent that identifies, lookups, and extracts FHIR resources from clinical notes."""
 
@@ -36,9 +39,11 @@ class ClinicalAnalystAgent:
         self,
         mcp_client: Optional[FHIRDocClient] = None,
         nci_client: Optional[NCIClient] = None,
+        validator: Optional[FHIRValidator] = None,
     ):
         self.mcp_client = mcp_client or FHIRDocClient()
         self.nci_client = nci_client or NCIClient()
+        self.validator = validator or FHIRValidator()
         self.model = GoogleModel(
             "gemini-3-flash-preview",
             provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
@@ -104,7 +109,12 @@ class ClinicalAnalystAgent:
 
             # Print conversation history before trying to parse the output
             logger.info("\n========== LLM MESSAGES AND MCP CALLS ==========")
-            for msg in result.all_messages():
+            messages = result.all_messages()
+            # If all_messages is an async method/mock in tests, handle it safely
+            if asyncio.iscoroutine(messages):
+                messages = await messages
+
+            for msg in messages:
                 logger.info("-" * 40)
                 if hasattr(msg, "parts"):
                     for part in msg.parts:
@@ -141,24 +151,8 @@ class ClinicalAnalystAgent:
             for item in extracted_data:
                 logger.info(json.dumps(item, indent=2))
 
-            validated_resources = []
-            for item in extracted_data:
-                res_type = item.get("resourceType")
-                try:
-                    if res_type == "Patient":
-                        validated_resources.append(Patient(**item))
-                    elif res_type == "Observation":
-                        validated_resources.append(Observation(**item))
-                    elif res_type == "Condition":
-                        validated_resources.append(Condition(**item))
-                    elif res_type == "Encounter":
-                        validated_resources.append(Encounter(**item))
-                    else:
-                        logger.warning(
-                            f"Resource type {res_type} not currently supported for direct validation."
-                        )
-                except Exception as e:
-                    logger.error(f"Validation error for {res_type}: {e}")
+            # Phase 4 AC4: Use the FHIRValidator to enforce schemas and drop invalid data
+            validated_resources = self.validator.validate_bundle(extracted_data)
 
             return validated_resources
 

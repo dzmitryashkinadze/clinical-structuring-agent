@@ -72,3 +72,23 @@ The Standardizer allows the agent to map unstructured clinical terminology (e.g.
 - `test_nci_client_success`: Mocks a successful 200 OK response from the NCI API and verifies parsing of `code` and `name`.
 - `test_nci_client_not_found`: Mocks a 404 or empty response and ensures the client returns `None`.
 - `test_nci_client_http_error`: Mocks a 500 error to verify the client handles it without crashing.
+
+---
+
+# SDD: Pipeline Orchestration & CLI (Phase 4)
+
+## Feature Description
+A command-line interface (CLI) to process a single clinical note (`.txt`, `.md` file, or raw string) using the `ClinicalAnalystAgent`. A dedicated `Validator` component will intercept the agent's raw JSON output to enforce strict `fhir.resources` compliance, dropping invalid objects and preparing the foundation for a future LLM self-correction loop.
+
+## Acceptance Criteria (AC)
+- **AC1:** A CLI `src/main.py` is implemented using `click`.
+- **AC2:** The `process` command accepts either `--text "Note here"` or `--file path/to/note.txt`.
+- **AC3:** The `process` command outputs formatted JSON to `stdout` by default, or saves it if `--out path/to/output.json` is provided.
+- **AC4:** A `FHIRValidator` class (`src/validator/fhir_validator.py`) receives raw JSON dicts from the agent.
+- **AC5:** The `FHIRValidator` logs `pydantic.ValidationError`s and drops invalid resources, returning only fully instantiated FHIR objects.
+
+## Test Description (TDD - Commit 1)
+- `test_validator_success`: Verifies a valid dictionary is instantiated correctly.
+- `test_validator_failure_dropped`: Verifies an invalid dictionary (missing required FHIR fields) logs an error and is dropped from the result list.
+- `test_cli_process_text`: Mocks the agent and verifies the CLI handles `--text` and `--out` arguments correctly.
+- `test_cli_process_file`: Mocks the agent and verifies the CLI reads a file correctly.
