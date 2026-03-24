@@ -48,6 +48,7 @@ class NCIClient:
                 concepts = data.get("concepts", [])
 
                 if not concepts:
+                    logger.debug(f"No matches found for '{query}' in {terminology}")
                     return None
 
                 # Take the first (best) match
@@ -56,12 +57,31 @@ class NCIClient:
                 # Resolve official FHIR system URI
                 system_uri = self.FHIR_SYSTEM_MAP.get(terminology.lower(), terminology)
 
+                logger.debug(
+                    f"Found match for '{query}' in {terminology}: {best_match.get('code')}"
+                )
                 return TerminologyMatch(
                     system=system_uri,
                     code=best_match.get("code", ""),
                     display=best_match.get("name", ""),
                 )
 
+        except httpx.HTTPStatusError as e:
+            # LOINC 404s are expected - NCI API limitation
+            if e.response.status_code == 404 and terminology.lower() == "loinc":
+                logger.debug(
+                    f"LOINC lookup failed for '{query}' (expected - NCI API limitation)"
+                )
+            # SNOMED-CT 404s are unexpected
+            elif e.response.status_code == 404:
+                logger.warning(
+                    f"Terminology lookup failed for '{query}' in {terminology}: {e.response.status_code}"
+                )
+            else:
+                logger.error(f"NCI API HTTP error for '{query}' in {terminology}: {e}")
+            return None
         except Exception as e:
-            logger.error(f"NCI API Error for '{query}' in {terminology}: {e}")
+            logger.error(
+                f"NCI API unexpected error for '{query}' in {terminology}: {e}"
+            )
             return None
