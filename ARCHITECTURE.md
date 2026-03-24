@@ -13,9 +13,13 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Storage:** Local cache in `data/fhir_docs/`.
 
 ### 2. Clinical Analyst Agent (`src/clinical_analyst/`)
-- **Purpose:** (Future) Extraction agent.
-- **Logic:** Consults the MCP Doc Tool to map text to valid FHIR fields.
-- **Output:** Raw `fhir.resources` Python objects.
+- **Purpose:** Extraction agent powered by **Pydantic AI** and **Gemini 3 Flash**.
+- **Logic:**
+    - `config.py`: Centralized settings (API keys, MCP paths) using `pydantic-settings`.
+    - `mcp_client.py`: Bridge to the FHIR Doc Tool MCP server.
+    - `agent.py`: LLM reasoning loop that consults the Doc Tool and maps text to `fhir.resources`.
+- **Flow:** Lookup (MCP) -> Plan -> Extract -> Validate.
+- **Output:** List of `fhir.resources` Python objects.
 
 ### 3. Standardizer (`src/standardizer/`)
 - **Purpose:** (Future) Terminology mapping using the NLM API.
