@@ -10,6 +10,7 @@ from fhir.resources.condition import Condition
 from fhir.resources.encounter import Encounter
 from .config import settings
 from .mcp_client import FHIRDocClient
+from src.standardizer.nci_client import NCIClient, TerminologyMatch
 import json
 
 # Setup logging
@@ -31,8 +32,13 @@ from pydantic_ai.providers.google import GoogleProvider
 class ClinicalAnalystAgent:
     """AC5: Agent that identifies, lookups, and extracts FHIR resources from clinical notes."""
 
-    def __init__(self, mcp_client: Optional[FHIRDocClient] = None):
+    def __init__(
+        self,
+        mcp_client: Optional[FHIRDocClient] = None,
+        nci_client: Optional[NCIClient] = None,
+    ):
         self.mcp_client = mcp_client or FHIRDocClient()
+        self.nci_client = nci_client or NCIClient()
         self.model = GoogleModel(
             "gemini-3-flash-preview",
             provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
@@ -46,12 +52,13 @@ class ClinicalAnalystAgent:
                 "Follow the 'Lookup-then-Extract' flow:\n"
                 "1. Use 'list_available_resources' to see what FHIR types are available.\n"
                 "2. Use 'get_fhir_schema' for the types you identify in the note.\n"
-                "3. Use 'get_field_details' if you need clarification on specific paths.\n"
+                "3. Use 'search_terminology' to look up standardized FHIR codes for medical concepts (e.g. SNOMED-CT for conditions, LOINC for observations).\n"
                 "4. Map the note content to valid FHIR JSON.\n\n"
                 "IMPORTANT INSTRUCTIONS:\n"
                 "- Output ONLY a JSON array of fully-populated FHIR resources.\n"
                 "- You must use full nested JSON objects/arrays (e.g., Patient.name is an array of objects).\n"
                 "- Do NOT invent random integers to replace complex objects.\n"
+                "- If a concept can be coded, use 'search_terminology' and put the result in a `CodeableConcept.coding` array.\n"
                 "- If no data is found, output '[]'.\n"
                 "- The result should be provided as a RAW JSON string in the `fhir_json_bundle` field."
             ),
@@ -74,6 +81,21 @@ class ClinicalAnalystAgent:
         ) -> Dict[str, Any]:
             """AC5: Get descriptions and constraints for a specific field path."""
             return await self.mcp_client.get_field_details(resource_name, field_path)
+
+        @self.agent.tool_plain
+        async def search_terminology(
+            query: str, terminology: str = "snomedct_us"
+        ) -> Optional[Dict[str, str]]:
+            """Phase 3 AC3: Search for official FHIR codes (SNOMED-CT, LOINC, etc.) for a medical concept.
+            Use 'snomedct_us' for conditions/diseases/procedures.
+            Use 'loinc' for observations/measurements.
+            Returns a Coding object {system, code, display} or None if not found.
+            """
+            logger.info(f"Looking up term: '{query}' in {terminology}")
+            match = await self.nci_client.search_concept(query, terminology)
+            if match:
+                return match.model_dump()
+            return None
 
     async def run(self, note: str) -> List[Any]:
         """AC2, AC4: Run the agent on a clinical note and return validated FHIR objects."""
