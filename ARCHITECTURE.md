@@ -22,7 +22,11 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Output:** List of `fhir.resources` Python objects.
 
 ### 3. Standardizer (`src/standardizer/`)
-- **Purpose:** (Future) Terminology mapping using the NLM API.
+- **Purpose:** Terminology mapping and semantic standardization.
+- **Logic:**
+    - `nci_client.py`: Python client for the National Cancer Institute (NCI) Enterprise Vocabulary Services (EVS) REST API.
+    - Resolves raw clinical terms to standard ontologies (e.g., SNOMED-CT, LOINC) without requiring an API key.
+- **Output:** Structured `Coding` arrays for `CodeableConcept` fields.
 
 ### 4. Validator (`src/validator/`)
 - **Purpose:** (Future) Schema enforcement and feedback loops.

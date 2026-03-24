@@ -53,3 +53,22 @@ An extraction agent powered by Pydantic AI and Gemini 3 Flash. It uses the FHIR 
 - `test_agent_empty_note`: Verifies the agent returns an empty list for non-clinical text.
 - `test_agent_mcp_integration`: Mocks the MCP server to verify that the agent calls the correct tools when clinical entities are present.
 - `test_agent_validation_error`: Verifies that if `fhir.resources` validation fails, it's caught and handled.
+
+---
+
+# SDD: Terminology Standardizer (Phase 3)
+
+## Feature Description
+The Standardizer allows the agent to map unstructured clinical terminology (e.g., "Hypertension") to official FHIR interoperability codes (e.g., SNOMED-CT, LOINC). Instead of generating raw strings in `CodeableConcept.text`, the agent can now construct fully qualified `Coding` entries. It queries the free, open NCI Enterprise Vocabulary Services (EVS) REST API.
+
+## Acceptance Criteria (AC)
+- **AC1:** An `NCIClient` component queries the NCI EVS search endpoint `https://api-evsrest.nci.nih.gov/api/v1/concept/[terminology]/search`.
+- **AC2:** The client can return the first match containing the `code`, `name` (display), and `terminology` (system).
+- **AC3:** The agent registers a `search_terminology` tool to access this client.
+- **AC4:** The `NCIClient` handles HTTP errors or no-match scenarios gracefully (returning `None`).
+- **AC5:** Unit tests verify the HTTP logic using `httpx` request mocking or `pytest-httpx`.
+
+## Test Description (TDD - Commit 1)
+- `test_nci_client_success`: Mocks a successful 200 OK response from the NCI API and verifies parsing of `code` and `name`.
+- `test_nci_client_not_found`: Mocks a 404 or empty response and ensures the client returns `None`.
+- `test_nci_client_http_error`: Mocks a 500 error to verify the client handles it without crashing.
