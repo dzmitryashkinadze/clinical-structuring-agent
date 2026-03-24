@@ -3,8 +3,7 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-    GOOGLE_API_KEY: Optional[str] = None
-    GEMINI_API_KEY: str
+    GOOGLE_API_KEY: str  # Use GOOGLE_API_KEY to satisfy pydantic-ai's GoogleProvider
     ANTHROPIC_API_KEY: Optional[str] = None
     LOG_LEVEL: str = "INFO"
     MCP_SERVER_COMMAND: str = "uv"

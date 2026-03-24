@@ -27,13 +27,18 @@ class ExtractionResult(BaseModel):
     )
 
 
+from pydantic_ai.providers.google import GoogleProvider
+
+
 class ClinicalAnalystAgent:
     """AC5: Agent that identifies, lookups, and extracts FHIR resources from clinical notes."""
 
     def __init__(self, mcp_client: Optional[FHIRDocClient] = None):
         self.mcp_client = mcp_client or FHIRDocClient()
-        # Rely on GEMINI_API_KEY environment variable
-        self.model = GoogleModel("gemini-1.5-flash")
+        self.model = GoogleModel(
+            "gemini-3-flash-preview",
+            provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
+        )
 
         self.agent = Agent(
             self.model,
@@ -94,5 +99,8 @@ class ClinicalAnalystAgent:
             return validated_resources
 
         except Exception as e:
+            import traceback
+
             logger.error(f"Agent execution failed: {e}")
+            logger.error(traceback.format_exc())
             return []
