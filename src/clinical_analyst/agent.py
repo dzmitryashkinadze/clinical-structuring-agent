@@ -23,6 +23,8 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.openai import OpenAIProvider
 from fhir.resources.patient import Patient
 from fhir.resources.observation import Observation
 from fhir.resources.condition import Condition
@@ -101,10 +103,6 @@ class ClinicalAnalystAgent:
             validator: Optional pre-configured FHIR validator
             validator_agent: Optional pre-configured validation agent
         """
-        logger.debug(
-            f"Initializing ClinicalAnalystAgent with model={settings.GEMINI_MODEL_NAME}"
-        )
-
         self.mcp_client = mcp_client or FHIRDocClient()
         self.nci_client = nci_client or NCIClient()
         self.validator = validator or FHIRValidator()
@@ -121,11 +119,35 @@ class ClinicalAnalystAgent:
                 "ANTHROPIC_API_KEY not provided - validation loop will use Python-only validation"
             )
 
-        # Initialize Gemini model
-        self.model = GoogleModel(
-            settings.GEMINI_MODEL_NAME,
-            provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
-        )
+        # Initialize model based on provider selection
+        if settings.EXTRACTION_MODEL_PROVIDER == "openai":
+            if not settings.OPENAI_API_KEY:
+                raise ValueError(
+                    "OPENAI_API_KEY is required when EXTRACTION_MODEL_PROVIDER=openai"
+                )
+            self.model = OpenAIChatModel(
+                settings.OPENAI_MODEL_NAME,
+                provider=OpenAIProvider(api_key=settings.OPENAI_API_KEY),
+            )
+            logger.debug(
+                f"Initializing ClinicalAnalystAgent with OpenAI model={settings.OPENAI_MODEL_NAME}"
+            )
+        elif settings.EXTRACTION_MODEL_PROVIDER == "google":
+            if not settings.GOOGLE_API_KEY:
+                raise ValueError(
+                    "GOOGLE_API_KEY is required when EXTRACTION_MODEL_PROVIDER=google"
+                )
+            self.model = GoogleModel(
+                settings.GEMINI_MODEL_NAME,
+                provider=GoogleProvider(api_key=settings.GOOGLE_API_KEY),
+            )
+            logger.debug(
+                f"Initializing ClinicalAnalystAgent with Google model={settings.GEMINI_MODEL_NAME}"
+            )
+        else:
+            raise ValueError(
+                f"Invalid EXTRACTION_MODEL_PROVIDER: {settings.EXTRACTION_MODEL_PROVIDER}. Must be 'openai' or 'google'"
+            )
 
         # Load system prompt from file
         try:

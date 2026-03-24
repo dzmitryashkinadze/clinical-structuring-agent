@@ -39,12 +39,17 @@ class Settings(BaseSettings):
     """
 
     # API Keys
-    GOOGLE_API_KEY: str  # Required - pydantic-ai's GoogleProvider expects this name
-    ANTHROPIC_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None  # Primary extraction model
+    GOOGLE_API_KEY: Optional[str] = None  # Alternative extraction model
+    ANTHROPIC_API_KEY: Optional[str] = None  # Validation model
 
     # Model Configuration
+    OPENAI_MODEL_NAME: str = Field(default="gpt-4o")
     GEMINI_MODEL_NAME: str = Field(default="gemini-3-flash-preview")
     CLAUDE_MODEL_NAME: str = Field(default="claude-sonnet-4-6")
+
+    # Model Selection (which provider to use for extraction)
+    EXTRACTION_MODEL_PROVIDER: str = Field(default="openai")  # "openai" or "google"
 
     # Pipeline Configuration
     MAX_VALIDATION_RETRIES: int = Field(default=3, ge=1, le=10)
