@@ -112,4 +112,8 @@ if __name__ == "__main__":
     from mcp.server.stdio import stdio_server
     import asyncio
 
-    asyncio.run(stdio_server(server))
+    async def main():
+        async with stdio_server() as (read, write):
+            await server.run(read, write, server.create_initialization_options())
+
+    asyncio.run(main())

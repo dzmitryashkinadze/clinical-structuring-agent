@@ -11,6 +11,8 @@ wheels/
 .env
 .DS_Store
 *.log
+
+# Data & Output
 data/output/*
 !data/output/.gitkeep
-
+data/fhir_docs/*.json
