@@ -29,4 +29,5 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 ## File Structure
 - `src/`: Component logic.
 - `tests/`: TDD suites (mirrors `src/` structure).
+- `scripts/`: Verification and maintenance scripts.
 - `data/fhir_docs/`: Local FHIR spec cache (JSON/HTML).
