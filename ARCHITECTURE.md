@@ -1,9 +1,11 @@
-# Application Architecture: Agentic EHR-to-FHIR Pipeline
+# Application Architecture: Clinical Structuring Agent
 
 ## Overview
-The system is a modular pipeline that transforms unstructured clinical notes into validated HL7 FHIR R4 resources. It separates the **Source of Truth (Documentation)** from the **Processing Logic (Agents)**.
+A modular, multi-agent pipeline that transforms unstructured clinical notes into validated, structured healthcare data formats. **Current implementation: HL7 FHIR R4.** Future roadmap: OMOP CDM, openEHR, HL7 v2.
 
-**Supported Resources:** 52 Clinical and Base FHIR R4 resources (3 excluded: Media, RequestGroup, DeviceUseStatement) covering patient demographics, clinical conditions, medications, procedures, diagnostics, care planning, care teams, and organizational entities. Foundation (conformance), Financial (billing), and Specialized (research) resources are explicitly excluded to maintain focus on direct clinical care.
+The architecture separates the **Source of Truth (Documentation)** from the **Processing Logic (Agents)**, enabling format-agnostic extraction with pluggable output adapters.
+
+**Current FHIR Coverage:** 52 Clinical and Base FHIR R4 resources covering patient demographics, clinical conditions, medications, procedures, diagnostics, care planning, care teams, and organizational entities. Foundation (conformance), Financial (billing), and Specialized (research) resources are explicitly excluded to maintain focus on direct clinical care.
 
 ## Core Components
 
@@ -16,13 +18,13 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Coverage:** 52 resources across 8 categories: Clinical Summary (7), Diagnostics (8), Medications (9), Care Provision (8), Request & Response (4), Individuals (6), Entities (10), Management (4).
 
 ### 2. Clinical Analyst Agent (`src/clinical_analyst/`)
-- **Purpose:** Extraction agent powered by **Pydantic AI** and **Gemini 3 Flash**.
+- **Purpose:** Extraction agent powered by **Pydantic AI** and **Claude Sonnet 4.6** (configurable: GPT-4o, Gemini 3 Flash).
 - **Logic:**
-    - `config.py`: Centralized settings (API keys, MCP paths) using `pydantic-settings`.
+    - `config.py`: Centralized settings (API keys, MCP paths, model selection) using `pydantic-settings`.
     - `mcp_client.py`: Bridge to the FHIR Doc Tool MCP server.
     - `agent.py`: LLM reasoning loop that consults the Doc Tool and maps text to `fhir.resources`.
 - **Flow:** Lookup (MCP) -> Plan -> Extract -> Validate.
-- **Output:** List of `fhir.resources` Python objects.
+- **Output:** List of `fhir.resources` Python objects (currently FHIR, designed for multi-format adapters).
 
 ### 3. Standardizer (`src/standardizer/`)
 - **Purpose:** Terminology mapping and semantic standardization.
@@ -36,7 +38,7 @@ The system is a modular pipeline that transforms unstructured clinical notes int
 - **Logic:**
     - `main.py`: `click`-based CLI to process single notes (`--text` or `--file`) and output valid FHIR JSON to `stdout` or `--out`.
     - `fhir_validator.py`: Python module that strictly evaluates LLM outputs against `fhir.resources`, generating a detailed report (VALID/INVALID + error strings) for each object. **Supports all 52 clinical + base resource types.**
-    - `agent.py`: A secondary **Validator Agent** powered by **Anthropic Claude Sonnet 4.6**. It consumes the Extractor's context and the Python validation report. It outputs a `ValidationDecision` (Accept/Reject) and detailed feedback.
+    - `agent.py`: A secondary **Validator Agent** powered by **GPT-5.4** (configurable: Claude Sonnet 4.6). It consumes the Extractor's context and the Python validation report. It outputs a `ValidationDecision` (Accept/Reject) and detailed feedback.
 - **Feedback Loop:** If rejected, the Extractor Agent receives the Validator's feedback and retries (up to 3 times).
 - **Output:** A strict array of validated `fhir.resources` models across any of the 52 supported resource types.
 

@@ -1,7 +1,7 @@
 [project]
-name = "fhir-structuring-agent"
+name = "clinical-structuring-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agentic AI pipeline for transforming unstructured clinical notes into structured healthcare data formats (FHIR, OMOP CDM, openEHR, HL7 v2)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

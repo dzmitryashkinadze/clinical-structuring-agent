@@ -112,7 +112,7 @@ async def list_resources_handler(arguments: dict) -> list[TextContent]:
 ```
 
 **v2:** Conceptual description
-> **Tool 1: list_resources()**  
+> **Tool 1: list_resources()**
 > Returns all 52 FHIR resource types we support, with short descriptions. The LLM calls this first to see what's available, like browsing a table of contents.
 
 ---
@@ -120,8 +120,8 @@ async def list_resources_handler(arguments: dict) -> list[TextContent]:
 ### Performance Results
 
 **v1:** Scattered throughout text
-> **Result:** 193KB → 7KB (96%)  
-> **Information preserved:** 100% of what the LLM needs  
+> **Result:** 193KB → 7KB (96%)
+> **Information preserved:** 100% of what the LLM needs
 > **Noise removed:** Publisher metadata, RIM mappings...
 
 **v2:** Clean comparison table
@@ -202,8 +202,8 @@ CLINICAL_RESOURCES = [
 Conceptual explanation with dialogue:
 > The LLM calls this first to see what's available, like browsing a table of contents.
 >
-> **Claude:** "I see a lab result in this note. What resources are available?"  
-> **MCP Server:** *[Returns list of 52 resources with descriptions]*  
+> **Claude:** "I see a lab result in this note. What resources are available?"
+> **MCP Server:** *[Returns list of 52 resources with descriptions]*
 > **Claude:** "Observation looks right for lab results. What fields does it have?"
 
 ---

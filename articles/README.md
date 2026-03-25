@@ -73,7 +73,7 @@ articles/
 To complete the article series, we need to build these extensions:
 
 ### Priority 1: OMOP CDM Integration ✅
-**Timeline:** 2-3 weeks  
+**Timeline:** 2-3 weeks
 **Components:**
 - `OMOPConverter` class (FHIR Bundle → OMOP tables)
 - Vocabulary mapping service (Athena integration)
@@ -83,7 +83,7 @@ To complete the article series, we need to build these extensions:
 **Article:** #5 (FHIR to OMOP)
 
 ### Priority 2: USDM/CDISC for Clinical Trials ✅
-**Timeline:** 3-4 weeks  
+**Timeline:** 3-4 weeks
 **Components:**
 - `ProtocolAnalystAgent` for study protocol extraction
 - USDM schema validation
@@ -93,7 +93,7 @@ To complete the article series, we need to build these extensions:
 **Article:** #6 (Clinical Trials at Scale)
 
 ### Priority 3: Financial FHIR Resources ✅
-**Timeline:** 1 week  
+**Timeline:** 1 week
 **Components:**
 - Expand to 16 financial resources (Claim, Coverage, etc.)
 - Insurance card OCR integration
@@ -102,7 +102,7 @@ To complete the article series, we need to build these extensions:
 **Article:** #7 (Clinical to Financial)
 
 ### Priority 4: Multi-Modal (Vision + Text) ✅
-**Timeline:** 2-3 weeks  
+**Timeline:** 2-3 weeks
 **Components:**
 - Vision model integration (GPT-4o vision)
 - DICOM metadata parsing

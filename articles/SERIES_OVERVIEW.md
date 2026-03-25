@@ -130,7 +130,7 @@
 
 ### Repository Structure
 ```
-fhir-structuring-agent/
+clinical-structuring-agent/
 ├── README.md (comprehensive, tutorial-style)
 ├── docs/
 │   ├── ARCHITECTURE.md

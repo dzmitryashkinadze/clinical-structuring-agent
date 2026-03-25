@@ -44,7 +44,7 @@
 class OMOPConverter:
     def convert_bundle(self, fhir_bundle: list) -> OMOPDataset:
         """Converts FHIR Bundle → OMOP CDM tables"""
-        
+
         omop_data = {
             "person": [],
             "condition_occurrence": [],
@@ -52,14 +52,14 @@ class OMOPConverter:
             "measurement": [],
             "observation": [],
         }
-        
+
         for resource in fhir_bundle:
             if resource["resourceType"] == "Patient":
                 omop_data["person"].append(self.convert_patient(resource))
             elif resource["resourceType"] == "Condition":
                 omop_data["condition_occurrence"].append(self.convert_condition(resource))
             # ...
-        
+
         return OMOPDataset(**omop_data)
 ```
 

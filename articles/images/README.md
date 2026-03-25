@@ -166,7 +166,7 @@ All diagrams use the Nano Banana theme variables. To adjust colors, modify the i
 
 ```javascript
 %%{init: {
-  'theme':'base', 
+  'theme':'base',
   'themeVariables': {
     'primaryColor':'#FEF3BD',
     'primaryBorderColor':'#FF6B6B',

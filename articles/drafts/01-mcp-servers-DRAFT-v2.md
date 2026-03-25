@@ -111,12 +111,12 @@ For when the LLM needs deep detail on a specific field—like "What are the exac
 
 With these tools in place, extraction became a conversation:
 
-**Claude:** "I see a lab result in this note. What resources are available?"  
-**MCP Server:** *[Returns list of 52 resources with descriptions]*  
-**Claude:** "Observation looks right for lab results. What fields does it have?"  
-**MCP Server:** *[Returns minified 7KB schema]*  
-**Claude:** "I need a LOINC code for HbA1c. Let me search..."  
-**Terminology API:** *[Returns LOINC 4548-4]*  
+**Claude:** "I see a lab result in this note. What resources are available?"
+**MCP Server:** *[Returns list of 52 resources with descriptions]*
+**Claude:** "Observation looks right for lab results. What fields does it have?"
+**MCP Server:** *[Returns minified 7KB schema]*
+**Claude:** "I need a LOINC code for HbA1c. Let me search..."
+**Terminology API:** *[Returns LOINC 4548-4]*
 **Claude:** "Perfect. Now I'll generate the FHIR JSON."
 
 The critical difference: **lookup before generation, not guess and pray.**
@@ -302,7 +302,7 @@ The complete system is on GitHub: [link to repo]
 **Quick start:**
 ```bash
 # Clone and install
-git clone [repo] && cd fhir-structuring-agent
+git clone [repo] && cd clinical-structuring-agent
 uv sync
 
 # Index FHIR resources (one-time setup)
@@ -316,7 +316,7 @@ You'll get valid FHIR JSON in ~3 seconds. No hallucinations. No $0.18/request co
 
 ## The Bigger Picture
 
-We started with a simple problem: stop LLMs from hallucinating medical codes. 
+We started with a simple problem: stop LLMs from hallucinating medical codes.
 
 We ended up discovering something bigger: **LLMs work better when they can look things up instead of memorizing everything.**
 
@@ -340,4 +340,3 @@ Your doctor doesn't memorize medical textbooks. Your LLM shouldn't have to eithe
 - [Anthropic MCP Documentation](https://modelcontextprotocol.io/)
 - [HL7 FHIR R4 Specification](https://hl7.org/fhir/R4/)
 - Our open-source repo: [link]
-

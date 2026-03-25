@@ -1,15 +1,23 @@
-# Agentic AI EHR-to-FHIR Extraction
+# Clinical Structuring Agent
 
-An agentic pipeline that transforms unstructured clinical notes into valid, interoperable FHIR R4 Python objects and JSON. **Supports 52 clinical and base resource types** covering the full spectrum of patient care documentation.
+An agentic AI pipeline that transforms unstructured clinical notes into structured, validated healthcare data formats. **FHIR-first implementation** with planned support for OMOP CDM, openEHR, and HL7 v2.
 
-## Features
+## Vision
 
-- **Comprehensive Resource Coverage:** Supports all 52 clinical and base FHIR R4 resources (3 excluded: Media, RequestGroup, DeviceUseStatement - not available in fhir.resources) (conditions, medications, procedures, diagnostics, care plans, care teams, organizations, and more)
-- **Multi-Agent Architecture:** Primary extraction agent (Gemini 3 Flash) + Validator agent (Claude Sonnet 4.6) with self-correction loop
-- **Clinical Analyst Agent:** Parses clinical notes and maps them to FHIR resources using dynamic schema lookup
+Transform clinical free text into any standardized healthcare format using multi-agent AI:
+- **HL7 FHIR R4** (current implementation - 52 resource types)
+- **OMOP CDM** (roadmap - Q2 2026)
+- **openEHR** (roadmap - Q3 2026)
+- **HL7 v2 Messages** (roadmap - Q4 2026)
+
+## Current Features (FHIR R4)
+
+- **Comprehensive Resource Coverage:** Supports all 52 clinical and base FHIR R4 resources (conditions, medications, procedures, diagnostics, care plans, care teams, organizations, and more)
+- **Multi-Agent Architecture:** Primary extraction agent (Claude Sonnet 4.6) + Validator agent (GPT-5.4) with self-correction loop
+- **Clinical Analyst Agent:** Parses clinical notes and maps them to FHIR resources using dynamic schema lookup via MCP
 - **Terminology Mapping:** Free NCI EVS API integration for SNOMED-CT/LOINC standardization (no API key required)
 - **Iterative Validation:** Multi-agent feedback loop with up to 3 retries for accuracy
-- **FHIR Doc Tool:** Local MCP server with minified schemas for fast, offline schema compliance
+- **FHIR Doc Tool:** Local MCP server with minified schemas (96% size reduction) for fast, offline schema compliance
 
 ## Getting Started
 

@@ -5,15 +5,15 @@
 
 stateDiagram-v2
     [*] --> InputReceived: User submits clinical note
-    
+
     state InputReceived {
         [*] --> Parse
         Parse: 📋 "Patient's HbA1c is 7.2%"
         Parse: ⏱️ t=0ms
     }
-    
+
     InputReceived --> AgentAnalysis: Extract resources
-    
+
     state AgentAnalysis {
         [*] --> Analyze
         Analyze: 🤖 Claude Sonnet analyzing...
@@ -21,9 +21,9 @@ stateDiagram-v2
         Analyze: 💭 "I see a lab result"
         Analyze: 💭 "Need to use Observation resource"
     }
-    
+
     AgentAnalysis --> ListResources: Call MCP tool
-    
+
     state ListResources {
         [*] --> ToolCall1
         ToolCall1: 🔌 list_resources()
@@ -33,9 +33,9 @@ stateDiagram-v2
         ToolResponse1: 📥 Response: [Patient, Observation, ...]
         ToolResponse1: ✅ 52 resources available
     }
-    
+
     ListResources --> GetSchema: Select Observation
-    
+
     state GetSchema {
         [*] --> ToolCall2
         ToolCall2: 🔌 get_resource_definition("Observation")
@@ -49,9 +49,9 @@ stateDiagram-v2
         ToolResponse2: ✅ required: [status, code]
         ToolResponse2: ✅ fields: {status, code, value*, ...}
     }
-    
+
     GetSchema --> LookupCode: Need LOINC code
-    
+
     state LookupCode {
         [*] --> ToolCall3
         ToolCall3: 🔍 search_terminology("HbA1c", "loinc")
@@ -61,9 +61,9 @@ stateDiagram-v2
         ToolResponse3: 📥 Response: LOINC 4548-4
         ToolResponse3: ✅ "Hemoglobin A1c/Hemoglobin.total in Blood"
     }
-    
+
     LookupCode --> Generate: All info gathered
-    
+
     state Generate {
         [*] --> CreateJSON
         CreateJSON: 🎨 Generating FHIR JSON...
@@ -74,9 +74,9 @@ stateDiagram-v2
         CreateJSON: ✓ valueQuantity: {7.2, %}
         CreateJSON: ✅ No hallucinated fields
     }
-    
+
     Generate --> PythonValidation: Validate schema
-    
+
     state PythonValidation {
         [*] --> SchemaCheck
         SchemaCheck: ✅ Python fhir.resources validation
@@ -86,9 +86,9 @@ stateDiagram-v2
         SchemaCheck: ✓ No invalid fields
         SchemaCheck: <b>PASS</b>
     }
-    
+
     PythonValidation --> GPTValidation: Second validation
-    
+
     state GPTValidation {
         [*] --> GPTCheck
         GPTCheck: ✅ GPT-5.4 validation
@@ -99,9 +99,9 @@ stateDiagram-v2
         GPTCheck: ✓ Clinical accuracy
         GPTCheck: <b>ACCEPTED</b>
     }
-    
+
     GPTValidation --> OutputReturned: Success
-    
+
     state OutputReturned {
         [*] --> Return
         Return: 📤 Return valid FHIR JSON
@@ -109,39 +109,39 @@ stateDiagram-v2
         Return: 💾 Save to output file
         Return: ✅ Extraction complete
     }
-    
+
     OutputReturned --> [*]: Done
-    
+
     note right of InputReceived
         <b>Phase 1: Input</b>
         Parse clinical note
         Identify extraction task
     end note
-    
+
     note right of ListResources
         <b>Phase 2: Discovery</b>
         Query available resources
         Select appropriate type
     end note
-    
+
     note right of GetSchema
         <b>Phase 3: Schema Lookup</b>
         Load FHIR specification
         Minify for LLM consumption
     end note
-    
+
     note right of LookupCode
         <b>Phase 4: Terminology</b>
         Standardize medical codes
         LOINC, SNOMED, RxNorm
     end note
-    
+
     note right of Generate
         <b>Phase 5: Generation</b>
         Create valid FHIR JSON
         Follow spec exactly
     end note
-    
+
     note right of GPTValidation
         <b>Phase 6: Validation</b>
         Dual validation approach

@@ -64,8 +64,8 @@ response = claude_sonnet.generate(prompt)
 }
 ```
 
-**Cost per 1,000 notes:** $180  
-**Accuracy:** 73% (based on our validation)  
+**Cost per 1,000 notes:** $180
+**Accuracy:** 73% (based on our validation)
 **False positive fields:** 23% of extractions included fabricated data
 
 That's $10,000+ wasted on hallucinations for a hospital processing 50,000 notes per month. And that's *before* you factor in the cost of fixing downstream errors.
@@ -116,8 +116,8 @@ Enter the Model Context Protocol.
 
 Think of MCP as giving your LLM a phone. Instead of memorizing every fact in the universe, it can call up external services and ask questions:
 
-"What fields does a FHIR Observation have?"  
-"What's the correct LOINC code for HbA1c?"  
+"What fields does a FHIR Observation have?"
+"What's the correct LOINC code for HbA1c?"
 "Is `Observation.specimen` required or optional?"
 
 **Technical definition:** MCP is Anthropic's protocol for LLM-to-external-system communication. It's JSON-RPC based, asynchronous, and supports three primitives:
@@ -329,8 +329,8 @@ Here's the brutal truth about FHIR StructureDefinitions: they're designed for hu
 }
 ```
 
-**Reduction:** 193 KB → 7 KB (96%)  
-**Information preserved:** 100% of what the LLM needs  
+**Reduction:** 193 KB → 7 KB (96%)
+**Information preserved:** 100% of what the LLM needs
 **Noise removed:** Publisher metadata, HL7 working group contacts, RIM mappings, XPath constraint expressions
 
 Here's the minification algorithm:
@@ -339,7 +339,7 @@ Here's the minification algorithm:
 def minify_fhir_schema(structure_def: dict) -> dict:
     """
     Reduces FHIR StructureDefinition from ~193KB to ~7KB (96%).
-    
+
     Keeps:
     - Field names and types
     - Required vs optional
@@ -347,7 +347,7 @@ def minify_fhir_schema(structure_def: dict) -> dict:
     - Reference targets
     - Value set bindings
     - Short descriptions
-    
+
     Removes:
     - Metadata (publisher, contact, dates)
     - Mappings (RIM, v2, SNOMED)
@@ -357,38 +357,38 @@ def minify_fhir_schema(structure_def: dict) -> dict:
     - Examples
     """
     elements = structure_def.get("snapshot", {}).get("element", [])
-    
+
     minified = {
         "resourceType": structure_def.get("type"),
         "required": [],
         "fields": {}
     }
-    
+
     for element in elements:
         path = element.get("path", "")
-        
+
         # Skip root element (Observation) and nested elements (Observation.code.coding)
         if "." not in path or path.count(".") > 1:
             continue
-        
+
         field_name = path.split(".")[-1]
-        
+
         # Extract field type (e.g., "code", "CodeableConcept", "Reference")
         field_type = None
         if element.get("type"):
             field_type = element["type"][0].get("code")
-        
+
         # Build minimal field definition
         field_def = {
             "type": field_type,
             "required": element.get("min", 0) > 0,
             "description": element.get("short", ""),  # Short desc only
         }
-        
+
         # Add array marker
         if element.get("max") == "*":
             field_def["array"] = True
-        
+
         # Add reference targets (e.g., Reference(Patient | Group))
         if field_type == "Reference":
             targets = []
@@ -399,20 +399,20 @@ def minify_fhir_schema(structure_def: dict) -> dict:
                         targets.append(target)
             if targets:
                 field_def["targets"] = targets
-        
+
         # Add value set binding
         if "binding" in element:
             binding = element["binding"]
             field_def["valueset"] = binding.get("valueSet")
             # Optionally include binding strength (required | extensible | preferred | example)
             field_def["binding_strength"] = binding.get("strength")
-        
+
         minified["fields"][field_name] = field_def
-        
+
         # Track required fields
         if field_def["required"]:
             minified["required"].append(field_name)
-    
+
     return minified
 ```
 
@@ -498,10 +498,10 @@ Here's what a real extraction trace looks like with full logging:
 2024-03-25 08:13:18 - INFO - Extraction complete: 1 Observation resource
 ```
 
-**Total time:** 8 seconds  
-**Tool calls:** 3  
-**Hallucinations:** 0  
-**Validator rejections:** 0  
+**Total time:** 8 seconds
+**Tool calls:** 3
+**Hallucinations:** 0
+**Validator rejections:** 0
 
 Compare that to our original attempt: 12.3 seconds, 2 tool calls, 3 hallucinated fields, 1 validator rejection.
 
@@ -592,17 +592,17 @@ async def handle_call_tool(
     name: str, arguments: dict | None
 ) -> list[types.TextContent]:
     """Handle tool calls from the LLM"""
-    
+
     if name == "list_resources":
         # Return list of supported resources
         return [types.TextContent(
             type="text",
             text=json.dumps(CLINICAL_RESOURCES, indent=2)
         )]
-    
+
     elif name == "get_resource_definition":
         resource_name = arguments["resource_name"]
-        
+
         # Load cached FHIR StructureDefinition
         struct_def_path = FHIR_DOCS_DIR / f"{resource_name}.json"
         if not struct_def_path.exists():
@@ -610,40 +610,40 @@ async def handle_call_tool(
                 type="text",
                 text=f"Error: Resource '{resource_name}' not indexed."
             )]
-        
+
         with open(struct_def_path) as f:
             structure_def = json.load(f)
-        
+
         # Minify schema
         minified = minify_fhir_schema(structure_def)
-        
+
         return [types.TextContent(
             type="text",
             text=json.dumps(minified, indent=2)
         )]
-    
+
     elif name == "get_field_details":
         resource_name = arguments["resource_name"]
         field_path = arguments["field_path"]
-        
+
         # Load full definition
         struct_def_path = FHIR_DOCS_DIR / f"{resource_name}.json"
         with open(struct_def_path) as f:
             structure_def = json.load(f)
-        
+
         # Find specific field in snapshot
         elements = structure_def.get("snapshot", {}).get("element", [])
         field = next(
             (e for e in elements if e.get("path") == field_path),
             None
         )
-        
+
         if not field:
             return [types.TextContent(
                 type="text",
                 text=f"Error: Field '{field_path}' not found in {resource_name}"
             )]
-        
+
         # Return detailed field info
         field_details = {
             "path": field["path"],
@@ -655,12 +655,12 @@ async def handle_call_tool(
             "constraints": field.get("constraint", []),
             "binding": field.get("binding", {})
         }
-        
+
         return [types.TextContent(
             type="text",
             text=json.dumps(field_details, indent=2)
         )]
-    
+
     else:
         return [types.TextContent(
             type="text",
@@ -698,27 +698,27 @@ from pathlib import Path
 
 async def index_fhir_resources(resource_names: list[str]):
     """Download and cache FHIR StructureDefinitions from HL7"""
-    
+
     FHIR_BASE_URL = "https://hl7.org/fhir/R4"
     CACHE_DIR = Path("data/fhir_docs")
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     async with httpx.AsyncClient() as client:
         for resource in resource_names:
             print(f"Fetching {resource}...")
-            
+
             # Download StructureDefinition from HL7
             url = f"{FHIR_BASE_URL}/{resource.lower()}.profile.json"
             response = await client.get(url)
             response.raise_for_status()
-            
+
             structure_def = response.json()
-            
+
             # Save to cache
             output_path = CACHE_DIR / f"{resource}.json"
             with open(output_path, "w") as f:
                 json.dump(structure_def, f, indent=2)
-            
+
             print(f"✓ Cached {resource} ({len(response.content)} bytes)")
 
 # Run once to populate cache
@@ -751,7 +751,7 @@ mcp_server_params = StdioServerParameters(
 @agent.system_prompt
 async def system_prompt():
     return """You are a FHIR extraction expert. When extracting data:
-    
+
     1. Use list_resources() to see what FHIR resources are available
     2. Use get_resource_definition() to get the schema before extraction
     3. Use get_field_details() if you need constraints for a specific field
@@ -762,16 +762,16 @@ async def system_prompt():
 # MCP tool registration happens automatically via client connection
 async def extract_fhir(clinical_note: str):
     """Extract FHIR resources from clinical note with MCP support"""
-    
+
     async with stdio_client(mcp_server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # List available MCP tools
             tools = await session.list_tools()
             print(f"Connected to MCP server with {len(tools)} tools")
-            
+
             # Run extraction (agent will call MCP tools as needed)
             result = await agent.run(clinical_note)
-            
+
             return result.output
 ```
 
@@ -821,7 +821,7 @@ def monitor_tool_call(func):
         start = time.perf_counter()
         result = await func(*args, **kwargs)
         duration = time.perf_counter() - start
-        
+
         # Log to your monitoring system
         logger.info(
             "mcp_tool_call",
@@ -829,7 +829,7 @@ def monitor_tool_call(func):
             duration_ms=duration * 1000,
             cache_hit=is_cache_hit(args, kwargs)
         )
-        
+
         return result
     return wrapper
 
@@ -1038,13 +1038,13 @@ And this is just FHIR. The same pattern works for OMOP, CDISC, XBRL, and any oth
 
 ## Try It Yourself
 
-**Full code:** [GitHub - fhir-structuring-agent](https://github.com/yourusername/fhir-structuring-agent)
+**Full code:** [GitHub - clinical-structuring-agent](https://github.com/yourusername/clinical-structuring-agent)
 
 **Quick start:**
 ```bash
 # Clone repo
-git clone https://github.com/yourusername/fhir-structuring-agent
-cd fhir-structuring-agent
+git clone https://github.com/yourusername/clinical-structuring-agent
+cd clinical-structuring-agent
 
 # Install dependencies
 uv sync

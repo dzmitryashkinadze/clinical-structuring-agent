@@ -144,7 +144,7 @@ async def handle_call_tool(
     if name == "list_resources":
         # Return 52 clinical + base FHIR resources
         resources = [
-            "Patient", "Observation", "Condition", 
+            "Patient", "Observation", "Condition",
             "MedicationRequest", "Procedure", ...
         ]
         return [types.TextContent(
@@ -233,35 +233,35 @@ Claude: Perfect, I'll use Observation for the lab result.
 ```python
 def minify_fhir_schema(structure_def: dict) -> dict:
     """Reduces FHIR schema from ~193KB to ~7KB (96% reduction)"""
-    
+
     # Extract only essential info
     elements = structure_def.get("snapshot", {}).get("element", [])
-    
+
     minified = {
         "resourceType": structure_def.get("type"),
         "required": [],
         "fields": {}
     }
-    
+
     for element in elements:
         path = element.get("path", "")
-        
+
         # Skip root element
         if "." not in path:
             continue
-        
+
         field_name = path.split(".")[-1]
-        
+
         # Essential metadata only
         field_def = {
             "type": element.get("type", [{}])[0].get("code"),
             "required": element.get("min", 0) > 0,
         }
-        
+
         # Add cardinality
         if element.get("max") == "*":
             field_def["array"] = True
-        
+
         # Add reference targets
         if field_def["type"] == "Reference":
             targets = [
@@ -270,16 +270,16 @@ def minify_fhir_schema(structure_def: dict) -> dict:
                 if "targetProfile" in t
             ]
             field_def["targets"] = targets
-        
+
         # Add value sets
         if "binding" in element:
             field_def["valueset"] = element["binding"].get("valueSet")
-        
+
         minified["fields"][field_name] = field_def
-        
+
         if field_def["required"]:
             minified["required"].append(field_name)
-    
+
     return minified
 ```
 
@@ -300,11 +300,11 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
     if name == "get_field_details":
         resource = arguments["resource_name"]
         field_path = arguments["field_path"]
-        
+
         # Load full definition for this field only
         structure_def = load_cached_fhir_doc(resource)
         field = find_field_in_snapshot(structure_def, field_path)
-        
+
         return [types.TextContent(
             type="text",
             text=json.dumps({
@@ -463,7 +463,7 @@ async with stdio_client(server_params) as (read, write):
     async with ClientSession(read, write) as session:
         # List available tools
         tools = await session.list_tools()
-        
+
         # Call a tool
         result = await session.call_tool(
             "get_resource_definition",
@@ -506,7 +506,7 @@ The pattern is the same: Give your LLM a library card, not a memorization test.
 
 ---
 
-**Try it yourself:** [GitHub repo link]  
+**Try it yourself:** [GitHub repo link]
 **Questions?** Comment below or reach out on [LinkedIn]
 
 **Next article:** Multi-agent validation loops—how GPT-5.4 and Claude collaborate to catch errors before they reach production.
