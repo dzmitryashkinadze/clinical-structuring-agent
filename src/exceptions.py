@@ -5,6 +5,15 @@ This module defines exceptions used throughout the FHIR structuring pipeline
 to provide clear, actionable error messages for different failure scenarios.
 """
 
+__all__ = [
+    "FHIRAgentError",
+    "FHIRValidationError",
+    "TerminologyServiceError",
+    "MCPConnectionError",
+    "PromptLoadError",
+    "ConfigurationError",
+]
+
 
 class FHIRAgentError(Exception):
     """Base exception for all FHIR agent errors."""

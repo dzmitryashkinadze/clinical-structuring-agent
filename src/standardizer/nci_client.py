@@ -2,7 +2,6 @@ import logging
 import httpx
 from typing import Optional
 from pydantic import BaseModel
-from src.clinical_analyst.config import settings
 
 logger = logging.getLogger(__name__)
 

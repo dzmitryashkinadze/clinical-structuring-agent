@@ -1,9 +1,7 @@
 import pytest
-from unittest.mock import AsyncMock, patch
-from pydantic import ValidationError
+from unittest.mock import AsyncMock
 from src.validator.agent import ValidatorAgent, ValidationDecision
 from src.validator.fhir_validator import ValidationReport
-from fhir.resources.patient import Patient
 
 
 @pytest.mark.asyncio

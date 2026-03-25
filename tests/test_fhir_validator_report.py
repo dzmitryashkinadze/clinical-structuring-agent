@@ -1,5 +1,4 @@
-import pytest
-from src.validator.fhir_validator import FHIRValidator, ValidationReport
+from src.validator.fhir_validator import FHIRValidator
 
 
 def test_validator_report_success():

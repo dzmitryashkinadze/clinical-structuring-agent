@@ -1,6 +1,5 @@
 import pytest
 from click.testing import CliRunner
-import os
 import json
 import shutil
 from pathlib import Path
@@ -71,9 +70,9 @@ async def test_mcp_list_resources():
     lines = output.split("\n")
     for line in lines:
         if line.strip():  # Skip empty lines
-            assert ":" in line, (
-                f"Line should have format 'Name: Description', got: {line}"
-            )
+            assert (
+                ":" in line
+            ), f"Line should have format 'Name: Description', got: {line}"
 
 
 @pytest.mark.asyncio
@@ -189,6 +188,6 @@ def test_all_52_clinical_resources_indexed():
         if not profile_file.exists() or not summary_file.exists():
             missing_resources.append(resource)
 
-    assert len(missing_resources) == 0, (
-        f"Missing indexed resources: {missing_resources}"
-    )
+    assert (
+        len(missing_resources) == 0
+    ), f"Missing indexed resources: {missing_resources}"

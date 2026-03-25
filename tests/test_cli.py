@@ -1,12 +1,10 @@
 import pytest
 import os
 import tempfile
-import json
 from click.testing import CliRunner
 from unittest.mock import AsyncMock
 
 from src.main import cli
-from src.clinical_analyst.agent import ClinicalAnalystAgent
 from fhir.resources.patient import Patient
 
 

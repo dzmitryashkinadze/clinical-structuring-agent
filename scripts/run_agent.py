@@ -2,7 +2,6 @@ import asyncio
 import sys
 import logging
 import logfire
-from pathlib import Path
 from src.clinical_analyst.agent import ClinicalAnalystAgent
 from src.clinical_analyst.config import settings
 

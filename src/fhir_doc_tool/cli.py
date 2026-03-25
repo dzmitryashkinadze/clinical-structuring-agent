@@ -1,8 +1,8 @@
-import os
 import json
-import httpx
-import click
 from pathlib import Path
+from typing import Optional
+import click
+import httpx
 from bs4 import BeautifulSoup
 
 DATA_DIR = Path("data/fhir_docs")
@@ -77,14 +77,14 @@ CORE_RESOURCES = [
 
 
 @click.group()
-def cli():
+def cli() -> None:
     """FHIR Doc Tool CLI for R4."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @cli.command()
 @click.option("--resources", help="Comma-separated list of resources to index")
-def index(resources):
+def index(resources: Optional[str]) -> None:
     """AC1: Index FHIR R4 resources into local cache."""
     target_resources = resources.split(",") if resources else CORE_RESOURCES
 
@@ -116,7 +116,7 @@ def index(resources):
 
 
 @cli.command()
-def list():
+def list() -> None:
     """AC3: List indexed resources."""
     indexed = [f.stem.replace(".profile", "") for f in DATA_DIR.glob("*.profile.json")]
     if not indexed:
@@ -128,7 +128,7 @@ def list():
 
 @cli.command()
 @click.argument("resource")
-def query(resource):
+def query(resource: str) -> None:
     """AC2: Query a human-readable summary of a resource."""
     summary_path = DATA_DIR / f"{resource}.summary.json"
     if not summary_path.exists():

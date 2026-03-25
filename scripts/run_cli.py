@@ -23,7 +23,7 @@ def run_cli_end_to_end():
         logger.error(f"Input file not found: {input_file}")
         sys.exit(1)
 
-    logger.info(f"Running CLI end-to-end test...")
+    logger.info("Running CLI end-to-end test...")
     logger.info(f"Input: {input_file}")
     logger.info(f"Output: {output_file}")
 

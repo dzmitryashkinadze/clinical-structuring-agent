@@ -1,5 +1,4 @@
-import asyncio
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from .config import settings
@@ -38,7 +37,7 @@ class FHIRDocClient:
                     raise ValueError(result.content[0].text)
                 import json
 
-                return json.loads(result.content[0].text)
+                return json.loads(result.content[0].text)  # type: ignore[no-any-return]
 
     async def get_field_details(
         self, resource_name: str, field_path: str
@@ -53,4 +52,4 @@ class FHIRDocClient:
                 )
                 import json
 
-                return json.loads(result.content[0].text)
+                return json.loads(result.content[0].text)  # type: ignore[no-any-return]

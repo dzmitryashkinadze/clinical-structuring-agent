@@ -16,9 +16,9 @@ import click
 import asyncio
 import json
 import logging
+from typing import Optional
 
 from src.clinical_analyst.agent import ClinicalAnalystAgent
-from src.validator.fhir_validator import FHIRValidator
 from src.utils.logging_config import setup_logging
 
 # Setup logging once at module load
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-def cli():
+def cli() -> None:
     """Agentic EHR-to-FHIR Extraction Pipeline."""
     pass
 
@@ -44,7 +44,7 @@ def cli():
     help="Path to save the resulting FHIR JSON array (e.g. data/output/result.json).",
     type=click.Path(writable=True),
 )
-def process(text, file, out):
+def process(text: Optional[str], file: Optional[str], out: Optional[str]) -> None:
     """AC1, AC2, AC3: Extract FHIR resources from a single note."""
 
     if not text and not file:
@@ -59,14 +59,14 @@ def process(text, file, out):
     if text:
         note_content = text
     else:
-        with open(file, "r", encoding="utf-8") as f:
+        with open(file, "r", encoding="utf-8") as f:  # type: ignore
             note_content = f.read()
 
     # Create an event loop explicitly so click can run async code
     asyncio.run(run_pipeline(note_content, out))
 
 
-async def run_pipeline(note: str, output_path: str):
+async def run_pipeline(note: str, output_path: Optional[str]) -> None:
     logger.info("Initializing Clinical Analyst Agent...")
     agent = ClinicalAnalystAgent()
 

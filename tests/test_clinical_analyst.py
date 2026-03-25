@@ -1,7 +1,5 @@
 import pytest
-import asyncio
 from unittest.mock import MagicMock, AsyncMock
-from pydantic import ValidationError
 from fhir.resources.patient import Patient
 from src.clinical_analyst.config import Settings
 from src.clinical_analyst.agent import ClinicalAnalystAgent, ExtractionResult

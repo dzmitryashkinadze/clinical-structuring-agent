@@ -1,5 +1,4 @@
 import pytest
-import pytest_asyncio
 from src.standardizer.nci_client import NCIClient, TerminologyMatch
 
 

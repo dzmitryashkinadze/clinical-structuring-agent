@@ -7,22 +7,34 @@ ensuring consistent log formats and levels across all modules.
 
 import logging
 import sys
-from pathlib import Path
+from typing import Optional, Protocol
+
+
+class SettingsProtocol(Protocol):
+    """Protocol for settings objects."""
+
+    LOG_LEVEL: str
+    LOG_FORMAT: str
+
 
 # Import settings at module level to avoid circular imports
 # This will be called before other modules import their loggers
 try:
-    from ..clinical_analyst.config import settings
+    from ..clinical_analyst.config import settings as _imported_settings
+
+    _settings: SettingsProtocol = _imported_settings
 except ImportError:
     # Fallback for testing or standalone scripts
     class FallbackSettings:
         LOG_LEVEL = "INFO"
         LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-    settings = FallbackSettings()
+    _settings = FallbackSettings()
 
 
-def setup_logging(log_level: str = None, log_format: str = None) -> None:
+def setup_logging(
+    log_level: Optional[str] = None, log_format: Optional[str] = None
+) -> None:
     """
     Configure application-wide logging.
 
@@ -39,8 +51,8 @@ def setup_logging(log_level: str = None, log_format: str = None) -> None:
         >>> setup_logging()  # Use settings from config
         >>> setup_logging(log_level="DEBUG")  # Override to DEBUG
     """
-    level = log_level or settings.LOG_LEVEL
-    format_str = log_format or settings.LOG_FORMAT
+    level = log_level or _settings.LOG_LEVEL
+    format_str = log_format or _settings.LOG_FORMAT
 
     # Convert string level to logging constant
     numeric_level = getattr(logging, level.upper(), logging.INFO)

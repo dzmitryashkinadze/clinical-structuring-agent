@@ -15,7 +15,7 @@ Dependencies:
 
 import json
 import logging
-from typing import List, Optional
+from typing import List, Any
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.providers.anthropic import AnthropicProvider
@@ -131,7 +131,7 @@ class ValidatorAgent:
     async def evaluate_bundle(
         self,
         note: str,
-        extractor_messages: list,
+        extractor_messages: List[Any],
         validation_reports: List[ValidationReport],
     ) -> ValidationDecision:
         """Phase 5 AC3: Consumes the context and generates a structured decision."""
@@ -159,7 +159,8 @@ class ValidatorAgent:
         try:
             logger.info("Validator Agent evaluating bundle...")
             result = await self.agent.run(prompt)
-            return result.output
+            decision: ValidationDecision = result.output
+            return decision
         except Exception as e:
             logger.error(f"Validator Agent failed: {e}")
             # Failsafe: if the validator crashes, reject with a generic error

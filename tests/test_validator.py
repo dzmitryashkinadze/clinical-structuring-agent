@@ -155,6 +155,6 @@ def test_validator_supports_all_52_resources(resource_type):
     assert len(result) >= 0, f"Validator should handle {resource_type}"
 
     # Check that the resource_type is in RESOURCE_MAP
-    assert resource_type in validator.RESOURCE_MAP, (
-        f"{resource_type} not in RESOURCE_MAP"
-    )
+    assert (
+        resource_type in validator.RESOURCE_MAP
+    ), f"{resource_type} not in RESOURCE_MAP"

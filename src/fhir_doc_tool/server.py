@@ -1,6 +1,6 @@
-import os
 import json
 from pathlib import Path
+from typing import Dict, Any, List
 from mcp.server import Server
 from mcp.types import Tool, TextContent
 
@@ -9,7 +9,7 @@ server = Server("fhir-doc-tool")
 
 
 @server.list_tools()
-async def list_tools() -> list[Tool]:
+async def list_tools() -> List[Tool]:
     """List available MCP tools for FHIR documentation."""
     return [
         Tool(
@@ -53,7 +53,7 @@ async def list_tools() -> list[Tool]:
 
 
 # Separate handlers for testing purposes
-async def list_resources_handler(arguments: dict) -> list[TextContent]:
+async def list_resources_handler(arguments: Dict[str, Any]) -> List[TextContent]:
     """List all indexed FHIR resources with short descriptions."""
     resources = []
 
@@ -78,7 +78,7 @@ async def list_resources_handler(arguments: dict) -> list[TextContent]:
                     first_sentence = "No description available."
 
                 resources.append(f"{resource_name}: {first_sentence}")
-        except Exception as e:
+        except Exception:
             # Fallback to just name if description loading fails
             resources.append(f"{resource_name}: (description unavailable)")
 
@@ -88,7 +88,7 @@ async def list_resources_handler(arguments: dict) -> list[TextContent]:
     return [TextContent(type="text", text="\n".join(resources))]
 
 
-def minify_fhir_schema(definition: dict) -> list[dict]:
+def minify_fhir_schema(definition: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Phase 1.5 AC1-AC3: Reduce StructureDefinition to bare minimum for LLM context."""
     snapshot_elements = definition.get("snapshot", {}).get("element", [])
     minified = []
@@ -131,7 +131,7 @@ def minify_fhir_schema(definition: dict) -> list[dict]:
     return minified
 
 
-async def get_definition_handler(arguments: dict) -> list[TextContent]:
+async def get_definition_handler(arguments: Dict[str, Any]) -> List[TextContent]:
     res = arguments.get("resource_name")
     path = DATA_DIR / f"{res}.profile.json"
     if not path.exists():
@@ -142,7 +142,7 @@ async def get_definition_handler(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=json.dumps(minified, indent=2))]
 
 
-async def get_field_details_handler(arguments: dict) -> list[TextContent]:
+async def get_field_details_handler(arguments: Dict[str, Any]) -> List[TextContent]:
     res = arguments.get("resource_name")
     path = arguments.get("field_path")
     profile_path = DATA_DIR / f"{res}.profile.json"
@@ -163,7 +163,7 @@ async def get_field_details_handler(arguments: dict) -> list[TextContent]:
 
 
 @server.call_tool()
-async def call_tool_handler(name: str, arguments: dict) -> list[TextContent]:
+async def call_tool_handler(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
     """Handle MCP tool calls."""
     if name == "list_resources":
         return await list_resources_handler(arguments)
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     from mcp.server.stdio import stdio_server
     import asyncio
 
-    async def main():
+    async def main() -> None:
         async with stdio_server() as (read, write):
             await server.run(read, write, server.create_initialization_options())
 

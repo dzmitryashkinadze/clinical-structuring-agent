@@ -16,28 +16,23 @@ Dependencies:
 - NCI EVS: Terminology standardization
 """
 
-import asyncio
 import logging
-from typing import List, Dict, Any, Union, Optional
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import Agent
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.providers.anthropic import AnthropicProvider
-from fhir.resources.patient import Patient
-from fhir.resources.observation import Observation
-from fhir.resources.condition import Condition
-from fhir.resources.encounter import Encounter
 import json
 
 from .config import settings
 from .mcp_client import FHIRDocClient
-from src.standardizer.nci_client import NCIClient, TerminologyMatch
+from src.standardizer.nci_client import NCIClient
 from src.validator.fhir_validator import FHIRValidator
-from src.validator.agent import ValidatorAgent, ValidationDecision
+from src.validator.agent import ValidatorAgent
 from src.utils.prompt_loader import load_prompt, PromptLoadError
 
 logger = logging.getLogger(__name__)
@@ -121,7 +116,7 @@ class ClinicalAnalystAgent:
                 settings.VALIDATION_MODEL_PROVIDER == "anthropic"
                 and settings.ANTHROPIC_API_KEY
             )
-            self.validator_agent = ValidatorAgent() if has_validator_key else None
+            self.validator_agent = ValidatorAgent() if has_validator_key else None  # type: ignore[assignment]
 
         if not self.validator_agent:
             logger.info(
@@ -220,7 +215,7 @@ class ClinicalAnalystAgent:
 
     async def run(self, note: str, max_retries: int = 3) -> List[Any]:
         """AC2, AC4: Run the agent on a clinical note, with up to 3 retries via Validator feedback."""
-        message_history = []
+        message_history: List[Any] = []
         attempt = 0
 
         while attempt <= max_retries:
