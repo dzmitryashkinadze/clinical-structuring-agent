@@ -45,11 +45,15 @@ class Settings(BaseSettings):
 
     # Model Configuration
     OPENAI_MODEL_NAME: str = Field(default="gpt-4o")
+    OPENAI_VALIDATOR_MODEL_NAME: str = Field(default="gpt-5.4")  # For validation agent
     GEMINI_MODEL_NAME: str = Field(default="gemini-3-flash-preview")
     CLAUDE_MODEL_NAME: str = Field(default="claude-sonnet-4-6")
 
-    # Model Selection (which provider to use for extraction)
-    EXTRACTION_MODEL_PROVIDER: str = Field(default="openai")  # "openai" or "google"
+    # Model Selection (which provider to use for extraction and validation)
+    EXTRACTION_MODEL_PROVIDER: str = Field(
+        default="anthropic"
+    )  # "openai", "google", or "anthropic"
+    VALIDATION_MODEL_PROVIDER: str = Field(default="openai")  # "openai" or "anthropic"
 
     # Pipeline Configuration
     MAX_VALIDATION_RETRIES: int = Field(default=3, ge=1, le=10)

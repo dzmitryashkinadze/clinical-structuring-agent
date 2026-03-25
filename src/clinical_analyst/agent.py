@@ -25,6 +25,8 @@ from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.providers.anthropic import AnthropicProvider
 from fhir.resources.patient import Patient
 from fhir.resources.observation import Observation
 from fhir.resources.condition import Condition
@@ -107,16 +109,23 @@ class ClinicalAnalystAgent:
         self.nci_client = nci_client or NCIClient()
         self.validator = validator or FHIRValidator()
 
-        # Only initialize the ValidatorAgent if Anthropic API key is available
-        self.validator_agent = (
-            validator_agent
-            if validator_agent
-            else (ValidatorAgent() if settings.ANTHROPIC_API_KEY else None)
-        )
+        # Initialize ValidatorAgent if appropriate API key is available
+        if validator_agent:
+            self.validator_agent = validator_agent
+        else:
+            # Check if required API key is available for validation
+            has_validator_key = (
+                settings.VALIDATION_MODEL_PROVIDER == "openai"
+                and settings.OPENAI_API_KEY
+            ) or (
+                settings.VALIDATION_MODEL_PROVIDER == "anthropic"
+                and settings.ANTHROPIC_API_KEY
+            )
+            self.validator_agent = ValidatorAgent() if has_validator_key else None
 
-        if not settings.ANTHROPIC_API_KEY:
+        if not self.validator_agent:
             logger.info(
-                "ANTHROPIC_API_KEY not provided - validation loop will use Python-only validation"
+                "Validator agent disabled - validation loop will use Python-only validation"
             )
 
         # Initialize model based on provider selection
@@ -144,9 +153,21 @@ class ClinicalAnalystAgent:
             logger.debug(
                 f"Initializing ClinicalAnalystAgent with Google model={settings.GEMINI_MODEL_NAME}"
             )
+        elif settings.EXTRACTION_MODEL_PROVIDER == "anthropic":
+            if not settings.ANTHROPIC_API_KEY:
+                raise ValueError(
+                    "ANTHROPIC_API_KEY is required when EXTRACTION_MODEL_PROVIDER=anthropic"
+                )
+            self.model = AnthropicModel(
+                settings.CLAUDE_MODEL_NAME,
+                provider=AnthropicProvider(api_key=settings.ANTHROPIC_API_KEY),
+            )
+            logger.debug(
+                f"Initializing ClinicalAnalystAgent with Anthropic model={settings.CLAUDE_MODEL_NAME}"
+            )
         else:
             raise ValueError(
-                f"Invalid EXTRACTION_MODEL_PROVIDER: {settings.EXTRACTION_MODEL_PROVIDER}. Must be 'openai' or 'google'"
+                f"Invalid EXTRACTION_MODEL_PROVIDER: {settings.EXTRACTION_MODEL_PROVIDER}. Must be 'openai', 'google', or 'anthropic'"
             )
 
         # Load system prompt from file

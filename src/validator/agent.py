@@ -20,6 +20,8 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.providers.anthropic import AnthropicProvider
 from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.models.openai import OpenAIChatModel
 
 from src.clinical_analyst.config import settings
 from src.utils.prompt_loader import load_prompt, PromptLoadError
@@ -79,20 +81,36 @@ class ValidatorAgent:
         Initialize the Validator Agent.
 
         Raises:
-            ValueError: If ANTHROPIC_API_KEY is not configured
+            ValueError: If required API key is not configured
             PromptLoadError: If the validator prompt cannot be loaded
         """
-        if not settings.ANTHROPIC_API_KEY:
-            raise ValueError(
-                "ANTHROPIC_API_KEY must be set in .env to use the Validator Agent."
+        # Initialize model based on provider selection
+        if settings.VALIDATION_MODEL_PROVIDER == "openai":
+            if not settings.OPENAI_API_KEY:
+                raise ValueError(
+                    "OPENAI_API_KEY must be set in .env when VALIDATION_MODEL_PROVIDER=openai"
+                )
+            logger.debug(
+                f"Initializing ValidatorAgent with OpenAI model={settings.OPENAI_VALIDATOR_MODEL_NAME}"
             )
-
-        logger.debug(
-            f"Initializing ValidatorAgent with model={settings.CLAUDE_MODEL_NAME}"
-        )
-
-        provider = AnthropicProvider(api_key=settings.ANTHROPIC_API_KEY)
-        self.model = AnthropicModel(settings.CLAUDE_MODEL_NAME, provider=provider)
+            provider = OpenAIProvider(api_key=settings.OPENAI_API_KEY)
+            self.model = OpenAIChatModel(
+                settings.OPENAI_VALIDATOR_MODEL_NAME, provider=provider
+            )
+        elif settings.VALIDATION_MODEL_PROVIDER == "anthropic":
+            if not settings.ANTHROPIC_API_KEY:
+                raise ValueError(
+                    "ANTHROPIC_API_KEY must be set in .env when VALIDATION_MODEL_PROVIDER=anthropic"
+                )
+            logger.debug(
+                f"Initializing ValidatorAgent with Anthropic model={settings.CLAUDE_MODEL_NAME}"
+            )
+            provider = AnthropicProvider(api_key=settings.ANTHROPIC_API_KEY)
+            self.model = AnthropicModel(settings.CLAUDE_MODEL_NAME, provider=provider)
+        else:
+            raise ValueError(
+                f"Invalid VALIDATION_MODEL_PROVIDER: {settings.VALIDATION_MODEL_PROVIDER}. Must be 'openai' or 'anthropic'"
+            )
 
         # Load system prompt from file
         try:
