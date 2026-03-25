@@ -56,9 +56,24 @@ def test_cli_query():
 
 @pytest.mark.asyncio
 async def test_mcp_list_resources():
-    """AC3: Verify MCP tool lists all available resources."""
+    """AC3: Verify MCP tool lists all available resources with descriptions."""
     result = await list_resources_handler({})
-    assert "Patient" in result[0].text
+    output = result[0].text
+
+    # Should contain resource name
+    assert "Patient" in output
+
+    # Should contain description (colon separates name from description)
+    assert "Patient:" in output
+    assert "Demographics" in output or "administrative" in output
+
+    # Verify format is "ResourceName: Description"
+    lines = output.split("\n")
+    for line in lines:
+        if line.strip():  # Skip empty lines
+            assert ":" in line, (
+                f"Line should have format 'Name: Description', got: {line}"
+            )
 
 
 @pytest.mark.asyncio

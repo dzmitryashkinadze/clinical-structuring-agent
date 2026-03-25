@@ -14,7 +14,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="list_resources",
-            description="AC3: List all locally indexed FHIR resources.",
+            description="AC3: List all locally indexed FHIR resources with short descriptions to help select the right resource type for extraction.",
             inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
@@ -54,15 +54,38 @@ async def list_tools() -> list[Tool]:
 
 # Separate handlers for testing purposes
 async def list_resources_handler(arguments: dict) -> list[TextContent]:
-    indexed = [
-        f.name.replace(".profile.json", "") for f in DATA_DIR.glob("*.profile.json")
-    ]
-    return [
-        TextContent(
-            type="text",
-            text="\n".join(sorted(indexed)) if indexed else "No resources indexed.",
-        )
-    ]
+    """List all indexed FHIR resources with short descriptions."""
+    resources = []
+
+    for profile_path in sorted(DATA_DIR.glob("*.profile.json")):
+        resource_name = profile_path.name.replace(".profile.json", "")
+
+        # Load schema to get description
+        try:
+            with open(profile_path) as f:
+                definition = json.load(f)
+                description = definition.get("description", "")
+
+                # Truncate description to first sentence (up to 100 chars)
+                if description:
+                    # Take first sentence or first 100 chars
+                    first_sentence = description.split(".")[0]
+                    if len(first_sentence) > 100:
+                        first_sentence = first_sentence[:100] + "..."
+                    else:
+                        first_sentence = first_sentence + "."
+                else:
+                    first_sentence = "No description available."
+
+                resources.append(f"{resource_name}: {first_sentence}")
+        except Exception as e:
+            # Fallback to just name if description loading fails
+            resources.append(f"{resource_name}: (description unavailable)")
+
+    if not resources:
+        return [TextContent(type="text", text="No resources indexed.")]
+
+    return [TextContent(type="text", text="\n".join(resources))]
 
 
 def minify_fhir_schema(definition: dict) -> list[dict]:
