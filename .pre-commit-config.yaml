@@ -67,7 +67,7 @@ repos:
     hooks:
       - id: pytest
         name: Run pytest suite
-        entry: bash -c 'export PYTHONPATH=/home/dima/fhir-structuring-agent:$PYTHONPATH && cd /home/dima/fhir-structuring-agent && uv run pytest'
+        entry: bash -c 'export PYTHONPATH=/home/dima/clinical-structuring-agent:$PYTHONPATH && cd /home/dima/clinical-structuring-agent && uv run pytest'
         language: system
         types: [python]
         pass_filenames: false

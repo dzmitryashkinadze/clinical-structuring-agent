@@ -16,3 +16,6 @@ wheels/
 data/output/*
 !data/output/.gitkeep
 data/fhir_docs/*.json
+
+# Articles (unpublished content)
+articles/
