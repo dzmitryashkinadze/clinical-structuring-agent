@@ -1,5 +1,10 @@
 # Clinical Structuring Agent
 
+[![CI](https://github.com/dzmitryashkinadze/clinical-structuring-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dzmitryashkinadze/clinical-structuring-agent/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dzmitryashkinadze/clinical-structuring-agent/branch/main/graph/badge.svg)](https://codecov.io/gh/dzmitryashkinadze/clinical-structuring-agent)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
 An agentic AI pipeline that transforms unstructured clinical notes into structured, validated healthcare data formats. **FHIR-first implementation** with planned support for OMOP CDM, openEHR, and HL7 v2.
 
 ## Vision

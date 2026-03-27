@@ -21,3 +21,6 @@ data/fhir_docs/*.json
 
 # Articles (unpublished content)
 articles/
+coverage.xml
+.coverage
+htmlcov/
